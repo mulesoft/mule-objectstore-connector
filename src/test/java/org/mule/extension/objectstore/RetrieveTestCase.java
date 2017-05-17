@@ -7,7 +7,12 @@
 package org.mule.extension.objectstore;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mule.runtime.api.metadata.DataType.JSON_STRING;
+import static org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON;
+import org.mule.runtime.api.message.Message;
+import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.core.api.Event;
 
 import java.io.Serializable;
@@ -15,6 +20,9 @@ import java.io.Serializable;
 import org.junit.Test;
 
 public class RetrieveTestCase extends AbstractObjectStoreTestCase {
+
+  public static final String DEFAULT_VALUE = "default";
+  private static final String NOT_EXISTING_KEY = "missaNotThereJarJar";
 
   @Override
   protected String getConfigFile() {
@@ -50,8 +58,34 @@ public class RetrieveTestCase extends AbstractObjectStoreTestCase {
 
   @Test
   public void retrieveUnexistingWithDefault() throws Exception {
-    Event event = flowRunner("retrieveWithDefault").withVariable("key", "missaNotThereJarJar").run();
-    assertThat(event.getMessage().getPayload().getValue(), equalTo("default"));
+    Event event = flowRunner("retrieveWithDefault").withVariable("key", NOT_EXISTING_KEY).run();
+    assertThat(event.getMessage().getPayload().getValue(), equalTo(DEFAULT_VALUE));
+    assertThat(objectStore.contains(NOT_EXISTING_KEY), is(false));
+  }
+
+  @Test
+  public void retrieveDefaultValueMaintainingDataType() throws Exception {
+    Message message = flowRunner("retrieveWithExpressionDefault")
+        .withPayload("default")
+        .withMediaType(APPLICATION_JSON)
+        .withVariable("key", NOT_EXISTING_KEY)
+        .run()
+        .getMessage();
+
+    assertThat(message.getPayload().getValue(), is(DEFAULT_VALUE));
+    assertThat(message.getPayload().getDataType().getMediaType().matches(JSON_STRING.getMediaType()), is(true));
+    assertThat(objectStore.contains(NOT_EXISTING_KEY), is(false));
+  }
+
+  @Test
+  public void retrieveMaintainingDataType() throws Exception {
+    objectStore.remove(KEY);
+    objectStore.store(KEY, new TypedValue<>(TEST_VALUE, JSON_STRING));
+
+    Message message = flowRunner("retrieve").withVariable("key", KEY).run().getMessage();
+    assertThat(message.getPayload().getValue(), equalTo(TEST_VALUE));
+    assertThat(message.getPayload().getDataType().getMediaType().matches(JSON_STRING.getMediaType()), is(true));
+    assertThat(message.getPayload().getDataType().getType(), equalTo(String.class));
   }
 
   @Test

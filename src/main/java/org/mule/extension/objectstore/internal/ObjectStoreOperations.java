@@ -10,6 +10,7 @@ import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.IN
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_ALREADY_EXISTS;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_NOT_FOUND;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NULL_VALUE;
+import static org.mule.runtime.api.message.NullAttributes.NULL_ATTRIBUTES;
 import static org.mule.runtime.core.api.config.MuleProperties.DEFAULT_USER_OBJECT_STORE_NAME;
 import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
 import org.mule.extension.objectstore.internal.error.RemoveErrorTypeProvider;
@@ -18,15 +19,18 @@ import org.mule.extension.objectstore.internal.error.StoreErrorTypeProvider;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.lock.LockFactory;
+import org.mule.runtime.api.message.NullAttributes;
+import org.mule.runtime.api.metadata.DataType;
+import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
-import org.mule.runtime.extension.api.annotation.DataTypeParameters;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
 import org.mule.runtime.extension.api.exception.ModuleException;
+import org.mule.runtime.extension.api.runtime.operation.Result;
 
 import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
@@ -80,7 +84,7 @@ public class ObjectStoreOperations implements Startable {
   @Throws(StoreErrorTypeProvider.class)
   @Summary("Stores the given value using the given key")
   public void store(String key,
-                    @Content Serializable value,
+                    @Content TypedValue<Serializable> value,
                     @Optional(defaultValue = "false") boolean failIfPresent,
                     @Optional(defaultValue = "true") boolean failOnNullValue) {
 
@@ -122,14 +126,16 @@ public class ObjectStoreOperations implements Startable {
    */
   @Throws(RetrieveErrorTypeProvider.class)
   @Summary("Retrieves the value stored for the given key")
-  @DataTypeParameters
-  public Serializable retrieve(String key,
-                               @Content @Optional(defaultValue = "#[null]") Serializable defaultValue) {
+  public Result<Serializable, NullAttributes> retrieve(
+                                                       String key,
+                                                       @Content @Optional(
+                                                           defaultValue = "#[null]") TypedValue<Serializable> defaultValue) {
+
     validateKey(key);
-    return onLocked(key, () -> {
+    Object value = onLocked(key, () -> {
       if (objectStore.contains(key)) {
         return objectStore.retrieve(key);
-      } else if (defaultValue != null) {
+      } else if (defaultValue != null && defaultValue.getValue() != null) {
         return defaultValue;
       } else {
         throw new ModuleException(KEY_NOT_FOUND, new IllegalArgumentException(
@@ -138,6 +144,17 @@ public class ObjectStoreOperations implements Startable {
                                                                                   + "value was not provided or resolved to a null value."));
       }
     });
+
+    TypedValue<Serializable> typedValue = value instanceof TypedValue
+        ? (TypedValue<Serializable>) value
+        : new TypedValue<>((Serializable) value, DataType.fromType(value.getClass()));
+
+    return Result.<Serializable, NullAttributes>builder()
+        .output(typedValue.getValue())
+        .attributes(NULL_ATTRIBUTES)
+        .mediaType(typedValue.getDataType().getMediaType())
+        .build();
+
   }
 
   /**
@@ -166,8 +183,8 @@ public class ObjectStoreOperations implements Startable {
     });
   }
 
-  private boolean validateValue(Serializable value, boolean failOnNullValue) {
-    if (value == null) {
+  private boolean validateValue(TypedValue<Serializable> value, boolean failOnNullValue) {
+    if (value == null || value.getValue() == null) {
       if (failOnNullValue) {
         throw new ModuleException(NULL_VALUE, new IllegalArgumentException(
                                                                            "A null value was provided. Please provided a non-null value or set the 'failOnNullValue' parameter to 'false'"));
@@ -207,6 +224,7 @@ public class ObjectStoreOperations implements Startable {
   private Lock getKeyLock(String key) {
     return lockFactory.createLock("_objectStoreConnector_" + DEFAULT_USER_OBJECT_STORE_NAME + "_" + key);
   }
+
 
   @FunctionalInterface
   private interface ObjectStoreTask {

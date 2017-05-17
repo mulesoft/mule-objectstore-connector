@@ -9,7 +9,11 @@ package org.mule.extension.objectstore;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON;
+import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.core.api.Event;
+
+import java.io.Serializable;
 
 import org.junit.Test;
 
@@ -28,7 +32,20 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
         .run();
 
     assertThat(event.getMessage().getPayload().getValue(), equalTo("OK"));
-    assertThat(objectStore.retrieve(KEY), equalTo(TEST_VALUE));
+    retrieveAndCompare(KEY, TEST_VALUE);
+  }
+
+  @Test
+  public void storeWithCustomMediaType() throws Exception {
+    flowRunner("store")
+        .withPayload(TEST_VALUE)
+        .withMediaType(APPLICATION_JSON)
+        .withVariable("key", KEY)
+        .run();
+
+    TypedValue<Serializable> storedValue = (TypedValue<Serializable>) objectStore.retrieve(KEY);
+    assertThat(storedValue.getValue(), equalTo(TEST_VALUE));
+    assertThat(storedValue.getDataType().getMediaType(), is(APPLICATION_JSON));
   }
 
   @Test
@@ -64,7 +81,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
         .run();
 
     assertThat(event.getMessage().getPayload().getValue(), equalTo("OK"));
-    assertThat(objectStore.retrieve(KEY), equalTo(overwrittenValue));
+    retrieveAndCompare(KEY, overwrittenValue);
   }
 
   @Test
@@ -77,7 +94,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
         .run();
 
     assertThat(event.getMessage().getPayload().getValue(), equalTo("KEY_ALREADY_EXISTS"));
-    assertThat(objectStore.retrieve(KEY), equalTo(TEST_VALUE));
+    retrieveAndCompare(KEY, TEST_VALUE);
   }
 
   @Test

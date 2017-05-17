@@ -6,8 +6,11 @@
  */
 package org.mule.extension.objectstore;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.mule.runtime.core.api.config.MuleProperties.DEFAULT_USER_OBJECT_STORE_NAME;
 import org.mule.functional.junit4.MuleArtifactFunctionalTestCase;
+import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.store.ObjectStore;
 
 import java.io.Serializable;
@@ -22,4 +25,10 @@ abstract class AbstractObjectStoreTestCase extends MuleArtifactFunctionalTestCas
   protected void doSetUp() throws Exception {
     objectStore = muleContext.getObjectStoreManager().getObjectStore(DEFAULT_USER_OBJECT_STORE_NAME);
   }
+
+  protected void retrieveAndCompare(String key, Serializable value) throws Exception {
+    TypedValue<Serializable> typedValue = (TypedValue<Serializable>) objectStore.retrieve(key);
+    assertThat(typedValue.getValue(), equalTo(value));
+  }
+
 }

@@ -34,4 +34,10 @@
             <os:default-value>default</os:default-value>
         </os:retrieve>
     </flow>
+
+    <flow name="retrieveWithExpressionDefault">
+        <os:retrieve key="#[key]">
+            <os:default-value>#[payload]</os:default-value>
+        </os:retrieve>
+    </flow>
 </mule>
