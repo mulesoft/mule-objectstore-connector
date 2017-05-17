@@ -1,0 +1,30 @@
+
+# Maven
+target/
+
+
+# Eclipse files
+.classpath
+.project
+.settings
+/workspace/
+
+# IntelliJ Idea files
+*.iml
+*.ipr
+*.iws
+*.idea
+
+# Mac
+.DS_Store
+
+# Test remnants
+.mule/
+*.log
+temp/
+muleEmbeddedDB/
+activemq-data/
+testdir/
+hostkey.ser
+*.h2.db
+*.factorypath

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:os="http://www.mulesoft.org/schema/mule/os"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+            http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+
+
+    <flow name="retrieve">
+        <try>
+            <os:retrieve key="#[key]" />
+            <error-handler>
+                <on-error-continue type="OS:INVALID_KEY">
+                    <set-payload value="INVALID_KEY" />
+                </on-error-continue>
+            </error-handler>
+        </try>
+    </flow>
+
+    <flow name="retrieveUnexisting">
+        <try>
+            <os:retrieve key="missaNotThereJarJar" />
+            <set-payload value="problem" />
+            <error-handler>
+                <on-error-continue type="OS:KEY_NOT_FOUND">
+                    <set-payload value="KEY_NOT_FOUND" />
+                </on-error-continue>
+            </error-handler>
+        </try>
+    </flow>
+
+    <flow name="retrieveWithDefault">
+        <os:retrieve key="#[key]">
+            <os:default-value>default</os:default-value>
+        </os:retrieve>
+    </flow>
+
+    <flow name="retrieveWithExpressionDefault">
+        <os:retrieve key="#[key]">
+            <os:default-value>#[payload]</os:default-value>
+        </os:retrieve>
+    </flow>
+</mule>
