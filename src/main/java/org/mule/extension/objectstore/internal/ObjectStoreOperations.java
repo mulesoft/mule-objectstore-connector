@@ -21,6 +21,7 @@ import org.mule.runtime.api.lock.LockFactory;
 import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
+import org.mule.runtime.extension.api.annotation.DataTypeParameters;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.Optional;
@@ -92,7 +93,7 @@ public class ObjectStoreOperations implements Startable {
       if (objectStore.contains(key)) {
         if (failIfPresent) {
           throw new ModuleException(KEY_ALREADY_EXISTS,
-                                    new IllegalArgumentException("ObjectStore already contains an object for key " + key));
+                                    new IllegalArgumentException("ObjectStore already contains an object for key '" + key + "'"));
         } else {
           objectStore.remove(key);
         }
@@ -121,6 +122,7 @@ public class ObjectStoreOperations implements Startable {
    */
   @Throws(RetrieveErrorTypeProvider.class)
   @Summary("Retrieves the value stored for the given key")
+  @DataTypeParameters
   public Serializable retrieve(String key,
                                @Content @Optional(defaultValue = "#[null]") Serializable defaultValue) {
     validateKey(key);
