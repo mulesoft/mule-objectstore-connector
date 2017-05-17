@@ -9,6 +9,8 @@ package org.mule.extension.objectstore;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.OS_CONNECTOR;
+import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.ObjectStoreStory.STORE;
 import static org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.core.api.Event;
@@ -16,7 +18,12 @@ import org.mule.runtime.core.api.Event;
 import java.io.Serializable;
 
 import org.junit.Test;
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
 
+@Features(OS_CONNECTOR)
+@Stories(STORE)
 public class StoreTestCase extends AbstractObjectStoreTestCase {
 
   @Override
@@ -25,6 +32,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
   }
 
   @Test
+  @Description("Store a value using new key")
   public void store() throws Exception {
     Event event = flowRunner("store")
         .withPayload(TEST_VALUE)
@@ -36,6 +44,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
   }
 
   @Test
+  @Description("Store a value which has a custom mediaType and verify that the same mediaType is available when retrieved")
   public void storeWithCustomMediaType() throws Exception {
     flowRunner("store")
         .withPayload(TEST_VALUE)
@@ -49,6 +58,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
   }
 
   @Test
+  @Description("Verify that INVALID_KEY error is thrown when using an empty key")
   public void storeWithEmptyKey() throws Exception {
     Event event = flowRunner("store")
         .withVariable("key", "")
@@ -60,6 +70,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
   }
 
   @Test
+  @Description("Verify that INVALID_KEY error is thrown when using a null key")
   public void storeWithNullKey() throws Exception {
     Event event = flowRunner("store")
         .withVariable("key", null)
@@ -71,6 +82,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
   }
 
   @Test
+  @Description("Overwrite a value for which a key already exists")
   public void overwriteValue() throws Exception {
     store();
 
@@ -85,6 +97,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
   }
 
   @Test
+  @Description("Fail when a storing a value which a key already exists")
   public void failIfKeyAlreadyPresent() throws Exception {
     store();
 
@@ -98,12 +111,14 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
   }
 
   @Test
+  @Description("Verify that operation skips when the value is null")
   public void skipNullValue() throws Exception {
     flowRunner("storeNullValue").withVariable("failOnNullValue", false).run();
     assertThat(objectStore.contains(KEY), is(false));
   }
 
   @Test
+  @Description("Verify that operation fails when the value is null")
   public void failOnNullValue() throws Exception {
     Event event = flowRunner("storeNullValue").withVariable("failOnNullValue", true).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo("NULL_VALUE"));
