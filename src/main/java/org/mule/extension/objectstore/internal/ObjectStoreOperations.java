@@ -126,10 +126,7 @@ public class ObjectStoreOperations implements Startable {
    */
   @Throws(RetrieveErrorTypeProvider.class)
   @Summary("Retrieves the value stored for the given key")
-  public Result<Serializable, NullAttributes> retrieve(
-                                                       String key,
-                                                       @Content @Optional(
-                                                           defaultValue = "#[null]") TypedValue<Serializable> defaultValue) {
+  public Result<Serializable, NullAttributes> retrieve(String key, @Content @Optional TypedValue<Serializable> defaultValue) {
 
     validateKey(key);
     Object value = onLocked(key, () -> {
