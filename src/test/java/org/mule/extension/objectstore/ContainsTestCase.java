@@ -47,6 +47,5 @@ public class ContainsTestCase extends AbstractObjectStoreTestCase {
     Event event = flowRunner("containsUnexisting").withVariable("key", unexistingKey).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo(false));
     assertThat(objectStore.contains(unexistingKey), is(false));
-
   }
 }
