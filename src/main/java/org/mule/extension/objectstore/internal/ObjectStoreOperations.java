@@ -25,6 +25,7 @@ import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
+import org.mule.runtime.api.util.Reference;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.Optional;
@@ -178,6 +179,23 @@ public class ObjectStoreOperations implements Startable {
       objectStore.remove(key);
       return null;
     });
+  }
+
+  /**
+   * Checks if there is any value associated to the given {@code key}. If no value exist for the key, then {@code false} will be returned.
+   * <p>
+   * This operation is synchronized on the key level. No other operation will be able to access the same key
+   * on the same object store while this operation is running. If the runtime is running on cluster mode, this synchronism is
+   * also guaranteed across nodes.
+   *
+   * @param key the key of the object to be removed
+   */
+  @Summary("Returns whether the key is present or not")
+  public boolean contains(String key) {
+    validateKey(key);
+    Reference<Boolean> result = new Reference<>();
+    onLocked(key, () -> result.set(objectStore.contains(key)));
+    return result.get();
   }
 
   private boolean validateValue(TypedValue<Serializable> value, boolean failOnNullValue) {
