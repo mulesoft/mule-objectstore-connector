@@ -27,11 +27,6 @@ public class ContainsTestCase extends AbstractObjectStoreTestCase {
     return "contains-config.xml";
   }
 
-  @Override
-  protected void doSetUp() throws Exception {
-    super.doSetUp();
-  }
-
   @Test
   @Description("Checks the existence of a given key")
   public void contains() throws Exception {

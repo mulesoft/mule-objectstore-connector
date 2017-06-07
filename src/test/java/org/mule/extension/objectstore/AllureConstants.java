@@ -18,6 +18,7 @@ public interface AllureConstants {
       String RETRIEVE = "Retrieve";
       String REMOVE = "Remove";
       String CONTAINS = "Contains";
+      String CLEAR = "Clear";
     }
   }
 }

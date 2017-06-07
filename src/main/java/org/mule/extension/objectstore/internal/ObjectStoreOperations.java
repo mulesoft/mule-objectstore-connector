@@ -35,6 +35,7 @@ import org.mule.runtime.extension.api.runtime.operation.Result;
 
 import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.inject.Inject;
 
@@ -52,6 +53,7 @@ public class ObjectStoreOperations implements Startable {
   private ObjectStoreManager objectStoreManager;
 
   private ObjectStore objectStore;
+  private final Lock objectStoreLock = new ReentrantLock();
 
   @Override
   public void start() throws MuleException {
@@ -198,6 +200,16 @@ public class ObjectStoreOperations implements Startable {
     return result.get();
   }
 
+  /**
+   * Removes all the contents in the store.
+   */
+  public void clear() {
+    onLock(objectStoreLock, () -> {
+      objectStore.clear();
+      return null;
+    });
+  }
+
   private boolean validateValue(TypedValue<Serializable> value, boolean failOnNullValue) {
     if (value == null || value.getValue() == null) {
       if (failOnNullValue) {
@@ -218,14 +230,7 @@ public class ObjectStoreOperations implements Startable {
   }
 
   private Serializable onLocked(String key, ObjectStoreTask task) {
-    final Lock lock = getKeyLock(key);
-    lock.lock();
-    try {
-      return execute(task);
-    } finally {
-      lock.unlock();
-    }
-
+    return onLock(getKeyLock(key), () -> onLock(objectStoreLock, task));
   }
 
   private Serializable execute(ObjectStoreTask task) {
@@ -240,6 +245,14 @@ public class ObjectStoreOperations implements Startable {
     return lockFactory.createLock("_objectStoreConnector_" + DEFAULT_USER_OBJECT_STORE_NAME + "_" + key);
   }
 
+  private Serializable onLock(Lock lock, ObjectStoreTask task) {
+    lock.lock();
+    try {
+      return execute(task);
+    } finally {
+      lock.unlock();
+    }
+  }
 
   @FunctionalInterface
   private interface ObjectStoreTask {
