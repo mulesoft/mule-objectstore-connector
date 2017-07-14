@@ -10,7 +10,6 @@ import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.IN
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_ALREADY_EXISTS;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_NOT_FOUND;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NULL_VALUE;
-import static org.mule.runtime.api.message.NullAttributes.NULL_ATTRIBUTES;
 import static org.mule.runtime.core.api.config.MuleProperties.DEFAULT_USER_OBJECT_STORE_NAME;
 import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
 import org.mule.extension.objectstore.internal.error.RemoveErrorTypeProvider;
@@ -19,7 +18,6 @@ import org.mule.extension.objectstore.internal.error.StoreErrorTypeProvider;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.lock.LockFactory;
-import org.mule.runtime.api.message.NullAttributes;
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.store.ObjectStore;
@@ -129,7 +127,7 @@ public class ObjectStoreOperations implements Startable {
    */
   @Throws(RetrieveErrorTypeProvider.class)
   @Summary("Retrieves the value stored for the given key")
-  public Result<Serializable, NullAttributes> retrieve(String key, @Content @Optional TypedValue<Serializable> defaultValue) {
+  public Result<Serializable, Void> retrieve(String key, @Content @Optional TypedValue<Serializable> defaultValue) {
 
     validateKey(key);
     Object value = onLocked(key, () -> {
@@ -149,9 +147,8 @@ public class ObjectStoreOperations implements Startable {
         ? (TypedValue<Serializable>) value
         : new TypedValue<>((Serializable) value, DataType.fromType(value.getClass()));
 
-    return Result.<Serializable, NullAttributes>builder()
+    return Result.<Serializable, Void>builder()
         .output(typedValue.getValue())
-        .attributes(NULL_ATTRIBUTES)
         .mediaType(typedValue.getDataType().getMediaType())
         .build();
 
