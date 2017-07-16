@@ -18,12 +18,12 @@ import org.mule.runtime.core.api.Event;
 import java.io.Serializable;
 
 import org.junit.Test;
-import ru.yandex.qatools.allure.annotations.Description;
-import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Stories;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
-@Features(OS_CONNECTOR)
-@Stories(STORE)
+@Feature(OS_CONNECTOR)
+@Story(STORE)
 public class StoreTestCase extends AbstractObjectStoreTestCase {
 
   @Override
