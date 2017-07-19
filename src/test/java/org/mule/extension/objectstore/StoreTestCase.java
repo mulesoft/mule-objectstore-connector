@@ -66,7 +66,6 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
         .run();
 
     assertThat(event.getMessage().getPayload().getValue(), equalTo("INVALID_KEY"));
-    assertThat(objectStore.contains(""), is(false));
   }
 
   @Test
@@ -78,7 +77,6 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
         .run();
 
     assertThat(event.getMessage().getPayload().getValue(), equalTo("INVALID_KEY"));
-    assertThat(objectStore.contains(""), is(false));
   }
 
   @Test
