@@ -5,20 +5,12 @@
       xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
             http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 
-
-    <flow name="clear">
-        <os:clear objectStore="${objectStore}"/>
-    </flow>
-
-    <flow name="unexistingStore">
-        <try>
-            <os:clear objectStore="notThere" />
-            <error-handler>
-                <on-error-continue type="OS:STORE_NOT_FOUND">
-                    <set-payload value="STORE_NOT_FOUND" />
-                </on-error-continue>
-            </error-handler>
-        </try>
-    </flow>
-
+    <os:object-store name="implicitStore"
+                     entryTtl="1"
+                     entryTtlUnit="HOURS"
+                     maxEntries="10"
+                     persistent="false"
+                     expirationInterval="2"
+                     expirationIntervalUnit="HOURS" />
+    
 </mule>

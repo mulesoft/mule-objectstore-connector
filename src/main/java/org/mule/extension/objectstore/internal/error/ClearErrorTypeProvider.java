@@ -6,8 +6,6 @@
  */
 package org.mule.extension.objectstore.internal.error;
 
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.INVALID_KEY;
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_NOT_FOUND;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_FOUND;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
@@ -17,11 +15,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Errors for the retrieve operation
+ * Errors for the clear operation
  *
  * @since 1.0
  */
-public class RetrieveErrorTypeProvider implements ErrorTypeProvider {
+public class ClearErrorTypeProvider implements ErrorTypeProvider {
 
   /**
    * {@inheritDoc}
@@ -30,8 +28,6 @@ public class RetrieveErrorTypeProvider implements ErrorTypeProvider {
   public Set<ErrorTypeDefinition> getErrorTypes() {
     Set<ErrorTypeDefinition> errors = new HashSet<>();
 
-    errors.add(INVALID_KEY);
-    errors.add(KEY_NOT_FOUND);
     errors.add(STORE_NOT_FOUND);
     errors.add(STORE_NOT_AVAILABLE);
 

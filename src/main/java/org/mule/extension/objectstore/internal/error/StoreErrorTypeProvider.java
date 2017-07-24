@@ -9,6 +9,8 @@ package org.mule.extension.objectstore.internal.error;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.INVALID_KEY;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NULL_VALUE;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_ALREADY_EXISTS;
+import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
+import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_FOUND;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
 import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
 
@@ -32,6 +34,8 @@ public class StoreErrorTypeProvider implements ErrorTypeProvider {
     errors.add(INVALID_KEY);
     errors.add(NULL_VALUE);
     errors.add(KEY_ALREADY_EXISTS);
+    errors.add(STORE_NOT_AVAILABLE);
+    errors.add(STORE_NOT_FOUND);
 
     return errors;
   }

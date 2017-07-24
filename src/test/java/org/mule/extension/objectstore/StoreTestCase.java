@@ -17,17 +17,21 @@ import org.mule.runtime.core.api.Event;
 
 import java.io.Serializable;
 
-import org.junit.Test;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.Test;
 
 @Feature(OS_CONNECTOR)
 @Story(STORE)
-public class StoreTestCase extends AbstractObjectStoreTestCase {
+public class StoreTestCase extends ParameterizedObjectStoreTestCase {
+
+  public StoreTestCase(String name) {
+    super(name);
+  }
 
   @Override
-  protected String getConfigFile() {
+  protected String doGetConfigFile() {
     return "store-config.xml";
   }
 
@@ -52,7 +56,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
         .withVariable("key", KEY)
         .run();
 
-    TypedValue<Serializable> storedValue = (TypedValue<Serializable>) objectStore.retrieve(KEY);
+    TypedValue<Serializable> storedValue = (TypedValue<Serializable>) getObjectStore().retrieve(KEY);
     assertThat(storedValue.getValue(), equalTo(TEST_VALUE));
     assertThat(storedValue.getDataType().getMediaType(), is(APPLICATION_JSON));
   }
@@ -112,7 +116,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
   @Description("Verify that operation skips when the value is null")
   public void skipNullValue() throws Exception {
     flowRunner("storeNullValue").withVariable("failOnNullValue", false).run();
-    assertThat(objectStore.contains(KEY), is(false));
+    assertThat(getObjectStore().contains(KEY), is(false));
   }
 
   @Test
@@ -120,6 +124,7 @@ public class StoreTestCase extends AbstractObjectStoreTestCase {
   public void failOnNullValue() throws Exception {
     Event event = flowRunner("storeNullValue").withVariable("failOnNullValue", true).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo("NULL_VALUE"));
-    assertThat(objectStore.contains(KEY), is(false));
+    assertThat(getObjectStore().contains(KEY), is(false));
   }
+
 }

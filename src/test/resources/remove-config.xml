@@ -8,7 +8,7 @@
 
     <flow name="remove">
         <try>
-            <os:remove key="#[vars.key]" />
+            <os:remove key="#[vars.key]" objectStore="${objectStore}" />
             <set-payload value="OK" />
             <error-handler>
                 <on-error-continue type="OS:INVALID_KEY">
@@ -20,11 +20,22 @@
 
     <flow name="removeUnexisting">
         <try>
-            <os:remove key="missaNotThereJarJar" />
+            <os:remove key="missaNotThereJarJar" objectStore="${objectStore}" />
             <set-payload value="problem" />
             <error-handler>
                 <on-error-continue type="OS:KEY_NOT_FOUND">
                     <set-payload value="KEY_NOT_FOUND" />
+                </on-error-continue>
+            </error-handler>
+        </try>
+    </flow>
+
+    <flow name="unexistingStore">
+        <try>
+            <os:remove key="key" objectStore="notThere" />
+            <error-handler>
+                <on-error-continue type="OS:STORE_NOT_FOUND">
+                    <set-payload value="STORE_NOT_FOUND" />
                 </on-error-continue>
             </error-handler>
         </try>

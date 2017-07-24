@@ -5,10 +5,9 @@
       xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
             http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 
-
     <flow name="store">
         <try>
-            <os:store key="#[vars.key]" />
+            <os:store key="#[vars.key]" objectStore="${objectStore}" />
             <set-payload value="OK" />
             <error-handler>
                 <on-error-continue type="OS:INVALID_KEY">
@@ -20,7 +19,7 @@
 
     <flow name="idempotentStore">
         <try>
-            <os:store key="#[vars.key]" failIfPresent="true" />
+            <os:store key="#[vars.key]" failIfPresent="true" objectStore="${objectStore}" />
             <set-payload value="OK" />
             <error-handler>
                 <on-error-continue type="OS:KEY_ALREADY_EXISTS">
@@ -32,7 +31,7 @@
 
     <flow name="storeNullValue">
         <try>
-            <os:store key="key" failOnNullValue="#[vars.failOnNullValue]">
+            <os:store key="key" failOnNullValue="#[vars.failOnNullValue]" objectStore="${objectStore}" >
                 <os:value>
                     #[null]
                 </os:value>
@@ -44,4 +43,16 @@
             </error-handler>
         </try>
     </flow>
+
+    <flow name="unexistingStore">
+        <try>
+            <os:store key="key" objectStore="notThere" />
+            <error-handler>
+                <on-error-continue type="OS:STORE_NOT_FOUND">
+                    <set-payload value="STORE_NOT_FOUND" />
+                </on-error-continue>
+            </error-handler>
+        </try>
+    </flow>
+    
 </mule>

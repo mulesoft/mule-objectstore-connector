@@ -20,17 +20,21 @@ import io.qameta.allure.Story;
 
 @Feature(OS_CONNECTOR)
 @Story(REMOVE)
-public class RemoveTestCase extends AbstractObjectStoreTestCase {
+public class RemoveTestCase extends ParameterizedObjectStoreTestCase {
+
+  public RemoveTestCase(String name) {
+    super(name);
+  }
 
   @Override
-  protected String getConfigFile() {
+  protected String doGetConfigFile() {
     return "remove-config.xml";
   }
 
   @Override
   protected void doSetUp() throws Exception {
     super.doSetUp();
-    objectStore.store(KEY, TEST_VALUE);
+    getObjectStore().store(KEY, TEST_VALUE);
   }
 
   @Test
@@ -38,7 +42,7 @@ public class RemoveTestCase extends AbstractObjectStoreTestCase {
   public void remove() throws Exception {
     Event event = flowRunner("remove").withVariable("key", KEY).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo("OK"));
-    assertThat(objectStore.contains(KEY), is(false));
+    assertThat(getObjectStore().contains(KEY), is(false));
   }
 
   @Test
@@ -46,7 +50,7 @@ public class RemoveTestCase extends AbstractObjectStoreTestCase {
   public void removeWithEmptyKey() throws Exception {
     Event event = flowRunner("remove").withVariable("key", "").run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo("INVALID_KEY"));
-    assertThat(objectStore.contains(KEY), is(true));
+    assertThat(getObjectStore().contains(KEY), is(true));
   }
 
   @Test
@@ -54,7 +58,7 @@ public class RemoveTestCase extends AbstractObjectStoreTestCase {
   public void removeWithNullKey() throws Exception {
     Event event = flowRunner("remove").withVariable("key", null).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo("INVALID_KEY"));
-    assertThat(objectStore.contains(KEY), is(true));
+    assertThat(getObjectStore().contains(KEY), is(true));
   }
 
   @Test

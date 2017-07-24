@@ -6,26 +6,28 @@
  */
 package org.mule.extension.objectstore.internal;
 
-import org.mule.extension.objectstore.api.ExtensionObjectStore;
+import org.mule.extension.objectstore.api.InlineObjectStore;
+import org.mule.extension.objectstore.api.TopLevelObjectStore;
 import org.mule.extension.objectstore.internal.error.ObjectStoreErrors;
+import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.extension.api.annotation.Export;
 import org.mule.runtime.extension.api.annotation.Extension;
 import org.mule.runtime.extension.api.annotation.Operations;
+import org.mule.runtime.extension.api.annotation.connectivity.ConnectionProviders;
 import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypes;
 
 /**
- * Connector that provides functionality to access Mule's default object store.
- *
- * In future versions, we will also support creating and managing additional ones.
+ * Connector that provides functionality to access and create {@link ObjectStore} instances.
  *
  * @since 1.0
  */
 @Extension(name = "ObjectStore",
-    description = "A Mule connector that provides functionality to access, create and manage Object stores")
+    description = "Connector that provides functionality to access and create ObjectStore instances")
 @Operations(ObjectStoreOperations.class)
+@ConnectionProviders(MuleObjectStoreManagerProvider.class)
 @ErrorTypes(ObjectStoreErrors.class)
-@Export(classes = ExtensionObjectStore.class)
+@Export(classes = {TopLevelObjectStore.class, InlineObjectStore.class})
 @Xml(prefix = "os")
 public class ObjectStoreConnector {
 

@@ -6,6 +6,7 @@
  */
 package org.mule.extension.objectstore.internal.error;
 
+import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
 
 /**
@@ -33,5 +34,15 @@ public enum ObjectStoreErrors implements ErrorTypeDefinition<ObjectStoreErrors> 
   /**
    * The ObjectStore needs to access a value, but the supplied key doesn't exist in that store
    */
-  KEY_NOT_FOUND
+  KEY_NOT_FOUND,
+
+  /**
+   * The operation refers to a global {@link ObjectStore} which does not exists
+   */
+  STORE_NOT_FOUND,
+
+  /**
+   * The operation refers to an {@link ObjectStore} which cannot be accessed at this time
+   */
+  STORE_NOT_AVAILABLE
 }

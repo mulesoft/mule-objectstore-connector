@@ -26,20 +26,24 @@ import io.qameta.allure.Story;
 
 @Feature(OS_CONNECTOR)
 @Story(RETRIEVE)
-public class RetrieveTestCase extends AbstractObjectStoreTestCase {
+public class RetrieveTestCase extends ParameterizedObjectStoreTestCase {
 
   public static final String DEFAULT_VALUE = "default";
   private static final String NOT_EXISTING_KEY = "missaNotThereJarJar";
 
+  public RetrieveTestCase(String name) {
+    super(name);
+  }
+
   @Override
-  protected String getConfigFile() {
+  protected String doGetConfigFile() {
     return "retrieve-config.xml";
   }
 
   @Override
   protected void doSetUp() throws Exception {
     super.doSetUp();
-    objectStore.store(KEY, TEST_VALUE);
+    getObjectStore().store(KEY, TEST_VALUE);
   }
 
   @Test
@@ -72,7 +76,7 @@ public class RetrieveTestCase extends AbstractObjectStoreTestCase {
   public void retrieveUnexistingWithDefault() throws Exception {
     Event event = flowRunner("retrieveWithDefault").withVariable("key", NOT_EXISTING_KEY).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo(DEFAULT_VALUE));
-    assertThat(objectStore.contains(NOT_EXISTING_KEY), is(false));
+    assertThat(getObjectStore().contains(NOT_EXISTING_KEY), is(false));
   }
 
   @Test
@@ -88,14 +92,14 @@ public class RetrieveTestCase extends AbstractObjectStoreTestCase {
 
     assertThat(message.getPayload().getValue(), is(DEFAULT_VALUE));
     assertThat(message.getPayload().getDataType().getMediaType().matches(JSON_STRING.getMediaType()), is(true));
-    assertThat(objectStore.contains(NOT_EXISTING_KEY), is(false));
+    assertThat(getObjectStore().contains(NOT_EXISTING_KEY), is(false));
   }
 
   @Test
   @Description("Retrieves a value which was stored with custom media type and such type is preserved")
   public void retrieveMaintainingDataType() throws Exception {
-    objectStore.remove(KEY);
-    objectStore.store(KEY, new TypedValue<>(TEST_VALUE, JSON_STRING));
+    getObjectStore().remove(KEY);
+    getObjectStore().store(KEY, new TypedValue<>(TEST_VALUE, JSON_STRING));
 
     Message message = flowRunner("retrieve").withVariable("key", KEY).run().getMessage();
     assertThat(message.getPayload().getValue(), equalTo(TEST_VALUE));
