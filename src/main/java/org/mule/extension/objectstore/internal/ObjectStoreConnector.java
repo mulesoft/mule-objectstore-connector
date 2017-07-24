@@ -6,7 +6,9 @@
  */
 package org.mule.extension.objectstore.internal;
 
+import org.mule.extension.objectstore.api.ExtensionObjectStore;
 import org.mule.extension.objectstore.internal.error.ObjectStoreErrors;
+import org.mule.runtime.extension.api.annotation.Export;
 import org.mule.runtime.extension.api.annotation.Extension;
 import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
@@ -23,6 +25,7 @@ import org.mule.runtime.extension.api.annotation.error.ErrorTypes;
     description = "A Mule connector that provides functionality to access, create and manage Object stores")
 @Operations(ObjectStoreOperations.class)
 @ErrorTypes(ObjectStoreErrors.class)
+@Export(classes = ExtensionObjectStore.class)
 @Xml(prefix = "os")
 public class ObjectStoreConnector {
 
