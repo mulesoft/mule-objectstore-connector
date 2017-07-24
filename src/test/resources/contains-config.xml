@@ -7,11 +7,11 @@
 
 
     <flow name="contains">
-        <os:store key="#[key]"/>
-        <os:contains key="#[key]"/>
+        <os:store key="#[vars.key]"/>
+        <os:contains key="#[vars.key]"/>
     </flow>
 
     <flow name="containsUnexisting">
-        <os:contains key="#[key]"/>
+        <os:contains key="#[vars.key]"/>
     </flow>
 </mule>

@@ -8,7 +8,7 @@
 
     <flow name="remove">
         <try>
-            <os:remove key="#[key]" />
+            <os:remove key="#[vars.key]" />
             <set-payload value="OK" />
             <error-handler>
                 <on-error-continue type="OS:INVALID_KEY">
