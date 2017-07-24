@@ -10,7 +10,7 @@ import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.IN
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_ALREADY_EXISTS;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_NOT_FOUND;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NULL_VALUE;
-import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_DEFAULT_PERSISTENT_NAME;
+import static org.mule.runtime.api.store.ObjectStoreManager.BASE_PERSISTENT_OBJECT_STORE_KEY;
 import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
 import org.mule.extension.objectstore.internal.error.RemoveErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.RetrieveErrorTypeProvider;
@@ -55,7 +55,7 @@ public class ObjectStoreOperations implements Startable {
 
   @Override
   public void start() throws MuleException {
-    objectStore = objectStoreManager.getObjectStore(OBJECT_STORE_DEFAULT_PERSISTENT_NAME);
+    objectStore = objectStoreManager.getObjectStore(BASE_PERSISTENT_OBJECT_STORE_KEY);
   }
 
   /**
@@ -239,7 +239,7 @@ public class ObjectStoreOperations implements Startable {
   }
 
   private Lock getKeyLock(String key) {
-    return lockFactory.createLock("_objectStoreConnector_" + OBJECT_STORE_DEFAULT_PERSISTENT_NAME + "_" + key);
+    return lockFactory.createLock("_objectStoreConnector_" + BASE_PERSISTENT_OBJECT_STORE_KEY + "_" + key);
   }
 
   private Serializable onLock(Lock lock, ObjectStoreTask task) {
