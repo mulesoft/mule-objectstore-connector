@@ -8,7 +8,7 @@
 
     <flow name="retrieve">
         <try>
-            <os:retrieve key="#[key]" />
+            <os:retrieve key="#[vars.key]" />
             <error-handler>
                 <on-error-continue type="OS:INVALID_KEY">
                     <set-payload value="INVALID_KEY" />
@@ -30,13 +30,13 @@
     </flow>
 
     <flow name="retrieveWithDefault">
-        <os:retrieve key="#[key]">
+        <os:retrieve key="#[vars.key]">
             <os:default-value>default</os:default-value>
         </os:retrieve>
     </flow>
 
     <flow name="retrieveWithExpressionDefault">
-        <os:retrieve key="#[key]">
+        <os:retrieve key="#[vars.key]">
             <os:default-value>#[payload]</os:default-value>
         </os:retrieve>
     </flow>

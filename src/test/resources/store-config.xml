@@ -8,7 +8,7 @@
 
     <flow name="store">
         <try>
-            <os:store key="#[key]" />
+            <os:store key="#[vars.key]" />
             <set-payload value="OK" />
             <error-handler>
                 <on-error-continue type="OS:INVALID_KEY">
@@ -20,7 +20,7 @@
 
     <flow name="idempotentStore">
         <try>
-            <os:store key="#[key]" failIfPresent="true" />
+            <os:store key="#[vars.key]" failIfPresent="true" />
             <set-payload value="OK" />
             <error-handler>
                 <on-error-continue type="OS:KEY_ALREADY_EXISTS">
@@ -32,7 +32,7 @@
 
     <flow name="storeNullValue">
         <try>
-            <os:store key="key" failOnNullValue="#[failOnNullValue]">
+            <os:store key="key" failOnNullValue="#[vars.failOnNullValue]">
                 <os:value>
                     #[null]
                 </os:value>
