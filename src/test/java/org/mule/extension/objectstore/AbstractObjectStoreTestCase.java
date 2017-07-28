@@ -6,12 +6,8 @@
  */
 package org.mule.extension.objectstore;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mule.runtime.api.store.ObjectStoreManager.BASE_PERSISTENT_OBJECT_STORE_KEY;
 import org.mule.functional.junit4.MuleArtifactFunctionalTestCase;
-import org.mule.runtime.api.metadata.TypedValue;
-import org.mule.runtime.api.store.ObjectStore;
+import org.mule.runtime.api.store.ObjectStoreManager;
 
 import java.io.Serializable;
 
@@ -19,16 +15,14 @@ abstract class AbstractObjectStoreTestCase extends MuleArtifactFunctionalTestCas
 
   protected static final String KEY = "myKey";
   protected static final Serializable TEST_VALUE = "I've been stored";
-  protected ObjectStore objectStore;
+  protected static final String PERSISTENT_STORE_DEFINITION_CONFIG_FILE_NAME = "store-persistent-definition-config.xml";
+  protected static final String TRANSIENT_STORE_DEFINITION_CONFIG_FILE_NAME = "store-transient-definition-config.xml";
+  protected static final String IMPLICIT_STORE_DEFINITION_CONFIG_FILE_NAME = "store-implicit-definition-config.xml";
+
+  protected ObjectStoreManager objectStoreManager;
 
   @Override
   protected void doSetUp() throws Exception {
-    objectStore = muleContext.getObjectStoreManager().getObjectStore(BASE_PERSISTENT_OBJECT_STORE_KEY);
+    objectStoreManager = muleContext.getObjectStoreManager();
   }
-
-  protected void retrieveAndCompare(String key, Serializable value) throws Exception {
-    TypedValue<Serializable> typedValue = (TypedValue<Serializable>) objectStore.retrieve(key);
-    assertThat(typedValue.getValue(), equalTo(value));
-  }
-
 }

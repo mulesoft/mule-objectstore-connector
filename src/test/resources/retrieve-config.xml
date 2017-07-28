@@ -8,7 +8,7 @@
 
     <flow name="retrieve">
         <try>
-            <os:retrieve key="#[vars.key]" />
+            <os:retrieve key="#[vars.key]" objectStore="${objectStore}" />
             <error-handler>
                 <on-error-continue type="OS:INVALID_KEY">
                     <set-payload value="INVALID_KEY" />
@@ -19,7 +19,7 @@
 
     <flow name="retrieveUnexisting">
         <try>
-            <os:retrieve key="missaNotThereJarJar" />
+            <os:retrieve key="missaNotThereJarJar" objectStore="${objectStore}" />
             <set-payload value="problem" />
             <error-handler>
                 <on-error-continue type="OS:KEY_NOT_FOUND">
@@ -30,14 +30,25 @@
     </flow>
 
     <flow name="retrieveWithDefault">
-        <os:retrieve key="#[vars.key]">
+        <os:retrieve key="#[vars.key]" objectStore="${objectStore}">
             <os:default-value>default</os:default-value>
         </os:retrieve>
     </flow>
 
     <flow name="retrieveWithExpressionDefault">
-        <os:retrieve key="#[vars.key]">
+        <os:retrieve key="#[vars.key]" objectStore="${objectStore}">
             <os:default-value>#[payload]</os:default-value>
         </os:retrieve>
+    </flow>
+
+    <flow name="unexistingStore">
+        <try>
+            <os:retrieve key="key" objectStore="notThere" />
+            <error-handler>
+                <on-error-continue type="OS:STORE_NOT_FOUND">
+                    <set-payload value="STORE_NOT_FOUND" />
+                </on-error-continue>
+            </error-handler>
+        </try>
     </flow>
 </mule>

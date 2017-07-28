@@ -20,10 +20,14 @@ import io.qameta.allure.Story;
 
 @Feature(OS_CONNECTOR)
 @Story(CONTAINS)
-public class ContainsTestCase extends AbstractObjectStoreTestCase {
+public class ContainsTestCase extends ParameterizedObjectStoreTestCase {
+
+  public ContainsTestCase(String name) {
+    super(name);
+  }
 
   @Override
-  protected String getConfigFile() {
+  protected String doGetConfigFile() {
     return "contains-config.xml";
   }
 
@@ -32,7 +36,7 @@ public class ContainsTestCase extends AbstractObjectStoreTestCase {
   public void contains() throws Exception {
     Event event = flowRunner("contains").withPayload(TEST_VALUE).withVariable("key", KEY).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo(true));
-    assertThat(objectStore.contains(KEY), is(true));
+    assertThat(getObjectStore().contains(KEY), is(true));
   }
 
   @Test
@@ -41,6 +45,6 @@ public class ContainsTestCase extends AbstractObjectStoreTestCase {
     String unexistingKey = "unexistingKey";
     Event event = flowRunner("containsUnexisting").withVariable("key", unexistingKey).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo(false));
-    assertThat(objectStore.contains(unexistingKey), is(false));
+    assertThat(getObjectStore().contains(unexistingKey), is(false));
   }
 }

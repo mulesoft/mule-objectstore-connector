@@ -6,34 +6,39 @@
  */
 package org.mule.extension.objectstore.internal;
 
+import static java.lang.String.format;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.INVALID_KEY;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_ALREADY_EXISTS;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_NOT_FOUND;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NULL_VALUE;
-import static org.mule.runtime.api.store.ObjectStoreManager.BASE_PERSISTENT_OBJECT_STORE_KEY;
+import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
+import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_FOUND;
+import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
+import org.mule.extension.objectstore.internal.error.ClearErrorTypeProvider;
+import org.mule.extension.objectstore.internal.error.ContainsErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.RemoveErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.RetrieveErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.StoreErrorTypeProvider;
-import org.mule.runtime.api.exception.MuleException;
-import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.lock.LockFactory;
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.api.metadata.TypedValue;
+import org.mule.runtime.api.store.ObjectAlreadyExistsException;
+import org.mule.runtime.api.store.ObjectDoesNotExistException;
 import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
-import org.mule.runtime.api.util.Reference;
+import org.mule.runtime.api.store.ObjectStoreNotAvailableException;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
+import org.mule.runtime.extension.api.annotation.param.reference.ObjectStoreReference;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 
 import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.inject.Inject;
 
@@ -42,21 +47,16 @@ import javax.inject.Inject;
  *
  * @since 1.0
  */
-public class ObjectStoreOperations implements Startable {
+public class ObjectStoreOperations {
 
   @Inject
   private LockFactory lockFactory;
 
   @Inject
-  private ObjectStoreManager objectStoreManager;
+  private ObjectStoreRegistry registry;
 
-  private ObjectStore objectStore;
-  private final Lock objectStoreLock = new ReentrantLock();
-
-  @Override
-  public void start() throws MuleException {
-    objectStore = objectStoreManager.getObjectStore(BASE_PERSISTENT_OBJECT_STORE_KEY);
-  }
+  @Inject
+  private ObjectStoreManager runtimeObjectStoreManager;
 
   /**
    * Stores the given {@code value} using the given {@code key}.
@@ -74,37 +74,41 @@ public class ObjectStoreOperations implements Startable {
    * but no value will be altered either.
    * <p>
    * Finally, this operation is synchronized on the key level. No other operation will be able to access the same key
-   * on the same object store while this operation is running. If the runtime is running on cluster mode, this synchronism is
+   * on the same object store while this operation is running. If the runtime is running on cluster mode, this synchronization is
    * also guaranteed across nodes.
    *
    * @param key             the key of the {@code value} to be stored
    * @param value           the value to be stored. Should not be {@code null} if {@code failOnNullValue} is set to {@code true}
    * @param failIfPresent   Whether to fail or update the pre existing value if the {@code key} already exists on the store
    * @param failOnNullValue Whether to fail or skip the operation if the {@code value} is {@code null}
+   * @param objectStore     A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
    */
   @Throws(StoreErrorTypeProvider.class)
   @Summary("Stores the given value using the given key")
   public void store(String key,
                     @Content TypedValue<Serializable> value,
                     @Optional(defaultValue = "false") boolean failIfPresent,
-                    @Optional(defaultValue = "true") boolean failOnNullValue) {
+                    @Optional(defaultValue = "true") boolean failOnNullValue,
+                    @ObjectStoreReference @Optional String objectStore) {
 
     if (!validateValue(value, failOnNullValue)) {
       return;
     }
+
     validateKey(key);
 
-    onLocked(key, () -> {
-      if (objectStore.contains(key)) {
+    withLockedKey(objectStore, key, os -> {
+      if (os.contains(key)) {
         if (failIfPresent) {
-          throw new ModuleException(KEY_ALREADY_EXISTS,
-                                    new IllegalArgumentException("ObjectStore already contains an object for key '" + key + "'"));
+          throw new ModuleException(KEY_ALREADY_EXISTS, new ObjectAlreadyExistsException(
+                                                                                         createStaticMessage("ObjectStore already contains an object for key '"
+                                                                                             + key + "'")));
         } else {
-          objectStore.remove(key);
+          os.remove(key);
         }
       }
 
-      objectStore.store(key, value);
+      os.store(key, value);
       return null;
     });
   }
@@ -118,28 +122,31 @@ public class ObjectStoreOperations implements Startable {
    * <b>WILL NOT</b> be stored.
    * <p>
    * Finally, this operation is synchronized on the key level. No other operation will be able to access the same key
-   * on the same object store while this operation is running. If the runtime is running on cluster mode, this synchronism is
+   * on the same object store while this operation is running. If the runtime is running on cluster mode, this synchronization is
    * also guaranteed across nodes.
    *
    * @param key          the key of the {@code value} to be retrieved
    * @param defaultValue value to be returned if the {@code key} doesn't exist in the store
+   * @param objectStore  A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
    * @return The stored value or the {@code defaultValue}
    */
   @Throws(RetrieveErrorTypeProvider.class)
   @Summary("Retrieves the value stored for the given key")
-  public Result<Serializable, Void> retrieve(String key, @Content @Optional TypedValue<Serializable> defaultValue) {
+  public Result<Serializable, Void> retrieve(String key,
+                                             @Content @Optional TypedValue<Serializable> defaultValue,
+                                             @ObjectStoreReference @Optional String objectStore) {
 
     validateKey(key);
-    Object value = onLocked(key, () -> {
-      if (objectStore.contains(key)) {
-        return objectStore.retrieve(key);
+    Object value = withLockedKey(objectStore, key, os -> {
+      if (os.contains(key)) {
+        return os.retrieve(key);
       } else if (defaultValue != null && defaultValue.getValue() != null) {
         return defaultValue;
       } else {
-        throw new ModuleException(KEY_NOT_FOUND, new IllegalArgumentException(
-                                                                              "ObjectStore doesn't contain any value for key '"
-                                                                                  + key + "' and default "
-                                                                                  + "value was not provided or resolved to a null value."));
+        throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
+                                                                                                            "ObjectStore '%s' doesn't contain any value for key '%s' and default value was not provided or "
+                                                                                                                + "resolved to a null value.",
+                                                                                                            objectStore, key))));
       }
     });
 
@@ -151,7 +158,6 @@ public class ObjectStoreOperations implements Startable {
         .output(typedValue.getValue())
         .mediaType(typedValue.getDataType().getMediaType())
         .build();
-
   }
 
   /**
@@ -159,23 +165,24 @@ public class ObjectStoreOperations implements Startable {
    * error will be thrown.
    * <p>
    * This operation is synchronized on the key level. No other operation will be able to access the same key
-   * on the same object store while this operation is running. If the runtime is running on cluster mode, this synchronism is
+   * on the same object store while this operation is running. If the runtime is running on cluster mode, this synchronization is
    * also guaranteed across nodes.
    *
-   * @param key the key of the object to be removed
+   * @param key         the key of the object to be removed
+   * @param objectStore A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
    */
   @Throws(RemoveErrorTypeProvider.class)
   @Summary("Removes the value associated to the given key")
-  public void remove(String key) {
+  public void remove(String key, @ObjectStoreReference @Optional String objectStore) {
     validateKey(key);
-    onLocked(key, () -> {
-      if (!objectStore.contains(key)) {
-        throw new ModuleException(KEY_NOT_FOUND, new IllegalArgumentException(
-                                                                              "ObjectStore doesn't contain any value for key '"
-                                                                                  + key + "'"));
+    withLockedKey(objectStore, key, os -> {
+      if (!os.contains(key)) {
+        throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
+                                                                                                            "ObjectStore doesn't contain any value for key '%s'",
+                                                                                                            key))));
       }
 
-      objectStore.remove(key);
+      os.remove(key);
       return null;
     });
   }
@@ -184,25 +191,28 @@ public class ObjectStoreOperations implements Startable {
    * Checks if there is any value associated to the given {@code key}. If no value exist for the key, then {@code false} will be returned.
    * <p>
    * This operation is synchronized on the key level. No other operation will be able to access the same key
-   * on the same object store while this operation is running. If the runtime is running on cluster mode, this synchronism is
+   * on the same object store while this operation is running. If the runtime is running on cluster mode, this synchronization is
    * also guaranteed across nodes.
    *
-   * @param key the key of the object to be removed
+   * @param key         the key of the object to be removed
+   * @param objectStore A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
    */
   @Summary("Returns whether the key is present or not")
-  public boolean contains(String key) {
+  @Throws(ContainsErrorTypeProvider.class)
+  public boolean contains(String key, @ObjectStoreReference @Optional String objectStore) {
     validateKey(key);
-    Reference<Boolean> result = new Reference<>();
-    onLocked(key, () -> result.set(objectStore.contains(key)));
-    return result.get();
+    return (boolean) withLockedKey(objectStore, key, os -> os.contains(key));
   }
 
   /**
    * Removes all the contents in the store.
+   *
+   * @param objectStore A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
    */
-  public void clear() {
-    onLock(objectStoreLock, () -> {
-      objectStore.clear();
+  @Throws(ClearErrorTypeProvider.class)
+  public void clear(@ObjectStoreReference @Optional String objectStore) {
+    withLockedStore(objectStore, os -> {
+      os.clear();
       return null;
     });
   }
@@ -226,34 +236,82 @@ public class ObjectStoreOperations implements Startable {
     }
   }
 
-  private Serializable onLocked(String key, ObjectStoreTask task) {
-    return onLock(getKeyLock(key), () -> onLock(objectStoreLock, task));
-  }
-
-  private Serializable execute(ObjectStoreTask task) {
-    try {
-      return task.run();
-    } catch (ObjectStoreException e) {
-      throw new ModuleException(ANY, e);
-    }
-  }
-
-  private Lock getKeyLock(String key) {
-    return lockFactory.createLock("_objectStoreConnector_" + BASE_PERSISTENT_OBJECT_STORE_KEY + "_" + key);
-  }
-
-  private Serializable onLock(Lock lock, ObjectStoreTask task) {
+  private Serializable withLockedKey(String objectStoreName, String key, ObjectStoreTask task) {
+    ObjectStore<Serializable> objectStore = getObjectStore(objectStoreName);
+    Lock lock = getKeyLock(key, objectStoreName);
     lock.lock();
     try {
-      return execute(task);
+      return task.run(objectStore);
+    } catch (ObjectAlreadyExistsException e) {
+      throw new ModuleException(createStaticMessage(format(
+                                                           "Key '%s' is already present on object store '%s'", key,
+                                                           objectStoreName)),
+                                KEY_ALREADY_EXISTS, e);
+    } catch (ObjectStoreNotAvailableException e) {
+      throw new ModuleException(createStaticMessage(format(
+                                                           "ObjectStore '%s' is not available at the moment", objectStoreName)),
+                                STORE_NOT_AVAILABLE, e);
+    } catch (ObjectDoesNotExistException e) {
+      throw new ModuleException(createStaticMessage(format(
+                                                           "Key '%s' does not exists on object store '%s'", key,
+                                                           objectStoreName)),
+                                KEY_NOT_FOUND, e);
+    } catch (ObjectStoreException e) {
+      throw new ModuleException(createStaticMessage(format(
+                                                           "Found error trying to access ObjectStore '%s'", objectStoreName)),
+                                ANY, e);
     } finally {
       lock.unlock();
     }
   }
 
+  private Serializable withLockedStore(String objectStoreName, ObjectStoreTask task) {
+
+    ObjectStore<Serializable> objectStore = getObjectStore(objectStoreName);
+    Lock lock = getStoreLock(objectStoreName);
+    lock.lock();
+    try {
+      return task.run(objectStore);
+    } catch (ObjectStoreNotAvailableException e) {
+      throw new ModuleException(createStaticMessage(format(
+                                                           "ObjectStore '%s' is not available at the moment", objectStoreName)),
+                                STORE_NOT_AVAILABLE, e);
+    } catch (ObjectStoreException e) {
+      throw new ModuleException(createStaticMessage(format(
+                                                           "Found error trying to access ObjectStore '%s'", objectStoreName)),
+                                ANY, e);
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  private Lock getKeyLock(String key, String objectStoreName) {
+    return lockFactory.createLock("_objectStoreConnector_" + objectStoreName + "_" + key);
+  }
+
+  private Lock getStoreLock(String objectStoreName) {
+    return lockFactory.createLock("_objectStoreConnector_" + objectStoreName);
+  }
+
+  private ObjectStore<Serializable> getObjectStore(String objectStoreName) {
+    if (objectStoreName == null) {
+      return runtimeObjectStoreManager.getDefaultPartition();
+    }
+
+    ObjectStore<Serializable> objectStore = registry.get(objectStoreName);
+    if (objectStore == null) {
+      throw new ModuleException(createStaticMessage(format(
+                                                           "ObjectStore '%s' was not defined. Is there a matching <os:object-store>?",
+                                                           objectStoreName)),
+                                STORE_NOT_FOUND);
+    }
+
+    return objectStore;
+  }
+
   @FunctionalInterface
   private interface ObjectStoreTask {
 
-    Serializable run() throws ObjectStoreException;
+    Serializable run(ObjectStore<Serializable> objectStore) throws ObjectStoreException;
   }
 }

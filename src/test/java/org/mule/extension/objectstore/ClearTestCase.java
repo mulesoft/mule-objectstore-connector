@@ -18,19 +18,23 @@ import io.qameta.allure.Story;
 
 @Feature(OS_CONNECTOR)
 @Story(CLEAR)
-public class ClearTestCase extends AbstractObjectStoreTestCase {
+public class ClearTestCase extends ParameterizedObjectStoreTestCase {
+
+  public ClearTestCase(String name) {
+    super(name);
+  }
 
   @Override
-  protected String getConfigFile() {
+  protected String doGetConfigFile() {
     return "clear-config.xml";
   }
 
   @Test
   @Description("Clears the entire store")
   public void clear() throws Exception {
-    objectStore.store(KEY, TEST_VALUE);
+    getObjectStore().store(KEY, TEST_VALUE);
     flowRunner("clear").run();
-    assertThat(objectStore.contains(KEY), is(false));
+    assertThat(getObjectStore().contains(KEY), is(false));
   }
 
 }
