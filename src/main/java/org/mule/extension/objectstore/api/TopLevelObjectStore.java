@@ -7,7 +7,7 @@
 package org.mule.extension.objectstore.api;
 
 import org.mule.runtime.extension.api.annotation.Alias;
-import org.mule.runtime.extension.api.annotation.dsl.xml.XmlHints;
+import org.mule.runtime.extension.api.annotation.dsl.xml.TypeDsl;
 import org.mule.runtime.extension.api.annotation.param.RefName;
 
 /**
@@ -16,7 +16,7 @@ import org.mule.runtime.extension.api.annotation.param.RefName;
  * @since 1.0
  */
 @Alias("objectStore")
-@XmlHints(allowTopLevelDefinition = true, allowInlineDefinition = false)
+@TypeDsl(allowTopLevelDefinition = true, allowInlineDefinition = false)
 public class TopLevelObjectStore extends ExtensionObjectStore {
 
   @RefName
