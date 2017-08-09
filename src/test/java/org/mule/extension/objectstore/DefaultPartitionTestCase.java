@@ -14,7 +14,7 @@ import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.
 import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.ObjectStoreStory.IMPLICIT_STORE;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.store.ObjectStore;
-import org.mule.runtime.core.api.Event;
+import org.mule.runtime.core.api.InternalEvent;
 
 import java.io.Serializable;
 
@@ -54,7 +54,7 @@ public class DefaultPartitionTestCase extends AbstractObjectStoreTestCase {
   @Description("Retrieve from implicit default partition")
   public void retrieve() throws Exception {
     storeTestValue();
-    Event event = test("retrieve");
+    InternalEvent event = test("retrieve");
     assertThat(event.getMessage().getPayload().getValue(), equalTo(VALUE));
   }
 
@@ -62,7 +62,7 @@ public class DefaultPartitionTestCase extends AbstractObjectStoreTestCase {
   @Description("Execute contains operation on implicit default partition")
   public void contains() throws Exception {
     storeTestValue();
-    Event event = test("contains");
+    InternalEvent event = test("contains");
     assertThat(event.getMessage().getPayload().getValue(), equalTo(true));
   }
 
@@ -86,7 +86,7 @@ public class DefaultPartitionTestCase extends AbstractObjectStoreTestCase {
     defaultPartition.store(KEY, VALUE);
   }
 
-  private Event test(String flowName) throws Exception {
+  private InternalEvent test(String flowName) throws Exception {
     return flowRunner(flowName).withVariable("key", KEY).withPayload(VALUE).run();
   }
 }

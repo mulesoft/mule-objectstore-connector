@@ -25,7 +25,7 @@ import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreSettings;
 import org.mule.runtime.core.DefaultEventContext;
 import org.mule.runtime.core.api.DefaultMuleException;
-import org.mule.runtime.core.api.Event;
+import org.mule.runtime.core.api.InternalEvent;
 import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Expression;
@@ -70,8 +70,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   private boolean persistent;
 
   /**
-   * The max number of entries allowed. Exceeding entries will be removed when expiration thread runs.
-   * If absent, then the described {@link ObjectStore} will have no size boundaries.
+   * The max number of entries allowed. Exceeding entries will be removed when expiration thread runs. If absent, then the
+   * described {@link ObjectStore} will have no size boundaries.
    */
   @Parameter
   @Optional
@@ -117,9 +117,9 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   /**
    * A reference to an {@code os:config} element which will be used to declare this ObjectStore.
    * <p>
-   * If not provided, the runtime's default {@link ObjectStoreManager} will be used. Setting this parameter is
-   * only necessary when you want to use a non default {@link ObjectStore} implementation. For example, if you want
-   * to have a store which is backed by redis or JDBC
+   * If not provided, the runtime's default {@link ObjectStoreManager} will be used. Setting this parameter is only necessary when
+   * you want to use a non default {@link ObjectStore} implementation. For example, if you want to have a store which is backed by
+   * redis or JDBC
    */
   @Parameter
   @Optional
@@ -249,9 +249,10 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
       return new FallbackObjectStoreManagerProvider();
     }
 
-    Event event = Event.builder(DefaultEventContext.create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName())))
-        .message(Message.of("none"))
-        .build();
+    InternalEvent event =
+        InternalEvent.builder(DefaultEventContext.create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName())))
+            .message(Message.of("none"))
+            .build();
 
     ConfigurationInstance configurationProvider;
     try {

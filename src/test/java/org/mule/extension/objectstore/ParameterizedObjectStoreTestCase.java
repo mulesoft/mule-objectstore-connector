@@ -11,7 +11,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.store.ObjectStore;
-import org.mule.runtime.core.api.Event;
+import org.mule.runtime.core.api.InternalEvent;
 import org.mule.tck.junit4.rule.SystemProperty;
 import org.mule.test.runner.RunnerDelegateTo;
 
@@ -83,7 +83,7 @@ public abstract class ParameterizedObjectStoreTestCase extends AbstractObjectSto
   @Test
   @Description("Verify that pointing to an undefined ObjectStore results in a STORE_NOT_FOUND error")
   public void undefinedStore() throws Exception {
-    Event event = flowRunner("unexistingStore")
+    InternalEvent event = flowRunner("unexistingStore")
         .withPayload("")
         .run();
 

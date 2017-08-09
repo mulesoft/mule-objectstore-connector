@@ -15,7 +15,7 @@ import static org.mule.runtime.api.metadata.DataType.JSON_STRING;
 import static org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON;
 import org.mule.runtime.api.message.Message;
 import org.mule.runtime.api.metadata.TypedValue;
-import org.mule.runtime.core.api.Event;
+import org.mule.runtime.core.api.InternalEvent;
 
 import java.io.Serializable;
 
@@ -67,14 +67,14 @@ public class RetrieveTestCase extends ParameterizedObjectStoreTestCase {
   @Test
   @Description("Verify that retrieving a value for which key doesn't exists throws KEY_NOT_FOUND error")
   public void retrieveUnexisting() throws Exception {
-    Event event = flowRunner("retrieveUnexisting").run();
+    InternalEvent event = flowRunner("retrieveUnexisting").run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo("KEY_NOT_FOUND"));
   }
 
   @Test
   @Description("Verify that retrieving a value for which key doesn't exists returns the default value but such value is not stored")
   public void retrieveUnexistingWithDefault() throws Exception {
-    Event event = flowRunner("retrieveWithDefault").withVariable("key", NOT_EXISTING_KEY).run();
+    InternalEvent event = flowRunner("retrieveWithDefault").withVariable("key", NOT_EXISTING_KEY).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo(DEFAULT_VALUE));
     assertThat(getObjectStore().contains(NOT_EXISTING_KEY), is(false));
   }
@@ -110,7 +110,7 @@ public class RetrieveTestCase extends ParameterizedObjectStoreTestCase {
   @Test
   @Description("Verify that retrieve returns the correct value, even if defaultValue was provided")
   public void retrieveExistingWithDefault() throws Exception {
-    Event event = flowRunner("retrieveWithDefault").withVariable("key", KEY).run();
+    InternalEvent event = flowRunner("retrieveWithDefault").withVariable("key", KEY).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo(TEST_VALUE));
   }
 
