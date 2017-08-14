@@ -51,6 +51,7 @@ import org.slf4j.Logger;
 public abstract class ExtensionObjectStore implements ObjectStore<Serializable>, Startable, Stoppable {
 
   private static final Logger LOGGER = getLogger(ExtensionObjectStore.class);
+  private boolean started = false;
 
   @Inject
   private ExtensionManager extensionManager;
@@ -137,6 +138,9 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   @Override
   public void start() throws MuleException {
+    if (started) {
+      return;
+    }
     storeManagerProvider = getObjectStoreManagerProvider();
     objectStoreManager = getObjectStoreManager();
 
@@ -148,6 +152,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
         .build());
 
     registry.register(resolveStoreName(), this);
+    started = true;
   }
 
   @Override
@@ -175,6 +180,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     storeManagerProvider = null;
     objectStoreManager = null;
     delegateStore = null;
+    started = false;
   }
 
   @Override
