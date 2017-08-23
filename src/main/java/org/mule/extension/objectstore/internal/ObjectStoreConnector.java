@@ -22,8 +22,7 @@ import org.mule.runtime.extension.api.annotation.error.ErrorTypes;
  *
  * @since 1.0
  */
-@Extension(name = "ObjectStore",
-    description = "Connector that provides functionality to access and create ObjectStore instances")
+@Extension(name = "ObjectStore")
 @Operations(ObjectStoreOperations.class)
 @ConnectionProviders(MuleObjectStoreManagerProvider.class)
 @ErrorTypes(ObjectStoreErrors.class)
