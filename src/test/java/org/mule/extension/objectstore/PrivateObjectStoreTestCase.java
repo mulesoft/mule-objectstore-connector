@@ -37,31 +37,24 @@ public class PrivateObjectStoreTestCase extends AbstractObjectStoreTestCase {
   @Test
   public void checkGlobalObjectStore() throws Exception {
     String payload = "globalPayload";
-    flowRunner(GLOBAL_OBJECT_STORE_FLOW_NAME).withPayload(payload).run();
-    ObjectStore objectStore = objectStoreManager.getObjectStore(GLOBAL_OBJECT_STORE_NAME);
-    assertThat(objectStore, is(not(nullValue())));
-    assertThat(objectStore.allKeys().size(), is(equalTo(1)));
-    assertThat(objectStore.contains(payload), is(true));
-    assertThat(objectStore.retrieve(payload), is(equalTo(payload)));
+    assertObjectStore(GLOBAL_OBJECT_STORE_FLOW_NAME, GLOBAL_OBJECT_STORE_NAME, payload);
   }
 
   @Test
   public void checkPrivateObjectStore() throws Exception {
     String payload = "privatePayload";
-    flowRunner(PRIVATE_OBJECT_STORE_FLOW_NAME).withPayload(payload).run();
-    ObjectStore objectStore = objectStoreManager.getObjectStore(PRIVATE_OBJECT_STORE_NAME);
-    assertThat(objectStore, is(not(nullValue())));
-    assertThat(objectStore.allKeys().size(), is(equalTo(1)));
-    assertThat(objectStore.contains(payload), is(true));
-    assertThat(objectStore.retrieve(payload), is(equalTo(payload)));
-
+    assertObjectStore(PRIVATE_OBJECT_STORE_FLOW_NAME, PRIVATE_OBJECT_STORE_NAME, payload);
   }
 
   @Test
   public void checkImplicitObjectStore() throws Exception {
     String payload = "implicitPayload";
-    flowRunner(IMPLICIT_OBJECT_STORE_FLOW_NAME).withPayload(payload).run();
-    ObjectStore objectStore = objectStoreManager.getObjectStore(IMPLICIT_OBJECT_STORE_NAME);
+    assertObjectStore(IMPLICIT_OBJECT_STORE_FLOW_NAME, IMPLICIT_OBJECT_STORE_NAME, payload);
+  }
+
+  private void assertObjectStore(String flowName, String objectStoreName, String payload) throws Exception {
+    flowRunner(flowName).withPayload(payload).run();
+    ObjectStore objectStore = objectStoreManager.getObjectStore(objectStoreName);
     assertThat(objectStore, is(not(nullValue())));
     assertThat(objectStore.allKeys().size(), is(equalTo(1)));
     assertThat(objectStore.contains(payload), is(true));
