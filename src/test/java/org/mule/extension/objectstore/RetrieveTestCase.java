@@ -59,12 +59,6 @@ public class RetrieveTestCase extends ParameterizedObjectStoreTestCase {
   }
 
   @Test
-  @Description("Verify that retrieving a value with a null key throws INVALID_KEY error")
-  public void retrieveNullKey() throws Exception {
-    assertThat(doRetrieve(null), equalTo("INVALID_KEY"));
-  }
-
-  @Test
   @Description("Verify that retrieving a value for which key doesn't exists throws KEY_NOT_FOUND error")
   public void retrieveUnexisting() throws Exception {
     InternalEvent event = flowRunner("retrieveUnexisting").run();

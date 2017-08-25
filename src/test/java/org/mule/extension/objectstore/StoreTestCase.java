@@ -73,17 +73,6 @@ public class StoreTestCase extends ParameterizedObjectStoreTestCase {
   }
 
   @Test
-  @Description("Verify that INVALID_KEY error is thrown when using a null key")
-  public void storeWithNullKey() throws Exception {
-    InternalEvent event = flowRunner("store")
-        .withVariable("key", null)
-        .withPayload(TEST_VALUE)
-        .run();
-
-    assertThat(event.getMessage().getPayload().getValue(), equalTo("INVALID_KEY"));
-  }
-
-  @Test
   @Description("Overwrite a value for which a key already exists")
   public void overwriteValue() throws Exception {
     store();
