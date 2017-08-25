@@ -54,14 +54,6 @@ public class RemoveTestCase extends ParameterizedObjectStoreTestCase {
   }
 
   @Test
-  @Description("Removing object using a null key throws INVALID_KEY error")
-  public void removeWithNullKey() throws Exception {
-    InternalEvent event = flowRunner("remove").withVariable("key", null).run();
-    assertThat(event.getMessage().getPayload().getValue(), equalTo("INVALID_KEY"));
-    assertThat(getObjectStore().contains(KEY), is(true));
-  }
-
-  @Test
   @Description("Removing object using a key which doesn't exists throws KEY_NOT_FOUND error")
   public void removeUnexisting() throws Exception {
     InternalEvent event = flowRunner("removeUnexisting").run();
