@@ -16,7 +16,8 @@ import org.mule.runtime.extension.api.annotation.param.RefName;
  * @since 1.0
  */
 @Alias("objectStore")
-@TypeDsl(allowTopLevelDefinition = true, allowInlineDefinition = false)
+@TypeDsl(allowTopLevelDefinition = true, allowInlineDefinition = false, substitutionGroup = "mule:abstract-object-store",
+    baseType = "mule:abstractObjectStoreType")
 public class TopLevelObjectStore extends ExtensionObjectStore {
 
   @RefName

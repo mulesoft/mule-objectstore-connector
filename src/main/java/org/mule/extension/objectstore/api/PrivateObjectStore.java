@@ -22,9 +22,10 @@ import org.mule.runtime.extension.api.annotation.param.Parameter;
  *
  * @since 1.0
  */
-@Alias("inlineObjectStore")
-@TypeDsl(allowTopLevelDefinition = false, allowInlineDefinition = true)
-public class InlineObjectStore extends ExtensionObjectStore {
+@Alias("privateObjectStore")
+@TypeDsl(allowTopLevelDefinition = false, allowInlineDefinition = true, substitutionGroup = "mule:abstract-private-object-store",
+    baseType = "mule:abstractObjectStoreType")
+public class PrivateObjectStore extends ExtensionObjectStore {
 
   /**
    * The name of this store
