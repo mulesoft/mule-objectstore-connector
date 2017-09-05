@@ -9,6 +9,8 @@ package org.mule.extension.objectstore.api;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.dsl.xml.TypeDsl;
 import org.mule.runtime.extension.api.annotation.param.RefName;
+import org.mule.runtime.extension.api.annotation.param.stereotype.Stereotype;
+import org.mule.runtime.extension.api.stereotype.ObjectStoreStereotype;
 
 /**
  * A global object store which any component can reference by name and use.
@@ -18,6 +20,7 @@ import org.mule.runtime.extension.api.annotation.param.RefName;
 @Alias("objectStore")
 @TypeDsl(allowTopLevelDefinition = true, allowInlineDefinition = false, substitutionGroup = "mule:abstract-object-store",
     baseType = "mule:abstractObjectStoreType")
+@Stereotype(ObjectStoreStereotype.class)
 public class TopLevelObjectStore extends ExtensionObjectStore {
 
   @RefName

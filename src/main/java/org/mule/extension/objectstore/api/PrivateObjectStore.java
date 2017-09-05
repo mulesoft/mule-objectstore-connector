@@ -12,6 +12,8 @@ import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.dsl.xml.TypeDsl;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
+import org.mule.runtime.extension.api.annotation.param.stereotype.Stereotype;
+import org.mule.runtime.extension.api.stereotype.ObjectStoreStereotype;
 
 /**
  * An ObjectStore which can only be defined embedded inside an owning component. No other component
@@ -25,6 +27,7 @@ import org.mule.runtime.extension.api.annotation.param.Parameter;
 @Alias("privateObjectStore")
 @TypeDsl(allowTopLevelDefinition = false, allowInlineDefinition = true, substitutionGroup = "mule:abstract-private-object-store",
     baseType = "mule:abstractObjectStoreType")
+@Stereotype(ObjectStoreStereotype.class)
 public class PrivateObjectStore extends ExtensionObjectStore {
 
   /**
