@@ -26,6 +26,7 @@ import org.mule.runtime.api.store.ObjectStoreSettings;
 import org.mule.runtime.core.DefaultEventContext;
 import org.mule.runtime.core.api.DefaultMuleException;
 import org.mule.runtime.core.api.InternalEvent;
+import org.mule.runtime.core.api.exception.NullExceptionHandler;
 import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Expression;
@@ -256,7 +257,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     }
 
     InternalEvent event =
-        InternalEvent.builder(DefaultEventContext.create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName())))
+        InternalEvent.builder(DefaultEventContext.create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName()),
+                                                         NullExceptionHandler.getInstance()))
             .message(Message.of("none"))
             .build();
 
