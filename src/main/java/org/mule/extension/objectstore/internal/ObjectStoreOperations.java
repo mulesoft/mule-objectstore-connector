@@ -16,7 +16,7 @@ import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.ST
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
-import org.mule.extension.objectstore.internal.error.ClearErrorTypeProvider;
+import org.mule.extension.objectstore.internal.error.AvailabilityErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.ContainsErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.RemoveErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.RetrieveErrorTypeProvider;
@@ -39,6 +39,8 @@ import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
 import javax.inject.Inject;
@@ -204,7 +206,7 @@ public class ObjectStoreOperations {
   @Throws(ContainsErrorTypeProvider.class)
   public boolean contains(String key, @ObjectStoreReference @Optional String objectStore) {
     validateKey(key);
-    return (boolean) withLockedKey(objectStore, key, os -> os.contains(key));
+    return withLockedKey(objectStore, key, os -> os.contains(key));
   }
 
   /**
@@ -212,11 +214,43 @@ public class ObjectStoreOperations {
    *
    * @param objectStore A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
    */
-  @Throws(ClearErrorTypeProvider.class)
+  @Throws(AvailabilityErrorTypeProvider.class)
   public void clear(@ObjectStoreReference @Optional String objectStore) {
     withLockedStore(objectStore, os -> {
       os.clear();
       return null;
+    });
+  }
+
+  /**
+   * Returns a List containing all keys that the {@code objectStore} currently holds values for.
+   *
+   * @param objectStore A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
+   * @return A List with all the keys or an empty one if the object store is empty
+   */
+  @Throws(AvailabilityErrorTypeProvider.class)
+  public List<String> retrieveAllKeys(@ObjectStoreReference @Optional String objectStore) {
+    return withLockedStore(objectStore, os -> os.allKeys());
+  }
+
+  /**
+   * Retrieves all the key value pairs in the object store
+   *
+   * @param objectStore A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
+   * @return All the key value pairs or an empty Map if no values are present
+   */
+  @Throws(AvailabilityErrorTypeProvider.class)
+  public Map<String, Serializable> retrieveAll(@ObjectStoreReference @Optional String objectStore) {
+    return withLockedStore(objectStore, os -> {
+      Map<String, Serializable> all = os.retrieveAll();
+      all.entrySet().forEach(entry -> {
+        Object value = entry.getValue();
+        if (value instanceof TypedValue) {
+          entry.setValue((Serializable) ((TypedValue) value).getValue());
+        }
+      });
+
+      return all;
     });
   }
 
@@ -239,7 +273,7 @@ public class ObjectStoreOperations {
     }
   }
 
-  private Serializable withLockedKey(String objectStoreName, String key, ObjectStoreTask task) {
+  private <T> T withLockedKey(String objectStoreName, String key, ObjectStoreTask<T> task) {
     ObjectStore<Serializable> objectStore = getObjectStore(objectStoreName);
     Lock lock = getKeyLock(key, objectStoreName);
     lock.lock();
@@ -268,8 +302,7 @@ public class ObjectStoreOperations {
     }
   }
 
-  private Serializable withLockedStore(String objectStoreName, ObjectStoreTask task) {
-
+  private <T> T withLockedStore(String objectStoreName, ObjectStoreTask<T> task) {
     ObjectStore<Serializable> objectStore = getObjectStore(objectStoreName);
     Lock lock = getStoreLock(objectStoreName);
     lock.lock();
@@ -313,8 +346,8 @@ public class ObjectStoreOperations {
   }
 
   @FunctionalInterface
-  private interface ObjectStoreTask {
+  private interface ObjectStoreTask<T> {
 
-    Serializable run(ObjectStore<Serializable> objectStore) throws ObjectStoreException;
+    T run(ObjectStore<Serializable> objectStore) throws ObjectStoreException;
   }
 }
