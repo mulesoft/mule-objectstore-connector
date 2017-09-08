@@ -11,7 +11,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.OS_CONNECTOR;
 import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.ObjectStoreStory.REMOVE;
-import org.mule.runtime.core.api.InternalEvent;
+
+import org.mule.runtime.core.api.event.BaseEvent;
 
 import org.junit.Test;
 import io.qameta.allure.Description;
@@ -40,7 +41,7 @@ public class RemoveTestCase extends ParameterizedObjectStoreTestCase {
   @Test
   @Description("Remove object of a given key")
   public void remove() throws Exception {
-    InternalEvent event = flowRunner("remove").withVariable("key", KEY).run();
+    BaseEvent event = flowRunner("remove").withVariable("key", KEY).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo("OK"));
     assertThat(getObjectStore().contains(KEY), is(false));
   }
@@ -48,7 +49,7 @@ public class RemoveTestCase extends ParameterizedObjectStoreTestCase {
   @Test
   @Description("Removing object using an empty key throws INVALID_KEY error")
   public void removeWithEmptyKey() throws Exception {
-    InternalEvent event = flowRunner("remove").withVariable("key", "").run();
+    BaseEvent event = flowRunner("remove").withVariable("key", "").run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo("INVALID_KEY"));
     assertThat(getObjectStore().contains(KEY), is(true));
   }
@@ -56,7 +57,7 @@ public class RemoveTestCase extends ParameterizedObjectStoreTestCase {
   @Test
   @Description("Removing object using a key which doesn't exists throws KEY_NOT_FOUND error")
   public void removeUnexisting() throws Exception {
-    InternalEvent event = flowRunner("removeUnexisting").run();
+    BaseEvent event = flowRunner("removeUnexisting").run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo("KEY_NOT_FOUND"));
   }
 }
