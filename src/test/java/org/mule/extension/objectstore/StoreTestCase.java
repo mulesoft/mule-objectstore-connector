@@ -13,7 +13,7 @@ import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.
 import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.ObjectStoreStory.STORE;
 import static org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON;
 import org.mule.runtime.api.metadata.TypedValue;
-import org.mule.runtime.core.api.InternalEvent;
+import org.mule.runtime.core.api.event.BaseEvent;
 
 import java.io.Serializable;
 
@@ -38,7 +38,7 @@ public class StoreTestCase extends ParameterizedObjectStoreTestCase {
   @Test
   @Description("Store a value using new key")
   public void store() throws Exception {
-    InternalEvent event = flowRunner("store")
+    BaseEvent event = flowRunner("store")
         .withPayload(TEST_VALUE)
         .withVariable("key", KEY)
         .run();
@@ -64,7 +64,7 @@ public class StoreTestCase extends ParameterizedObjectStoreTestCase {
   @Test
   @Description("Verify that INVALID_KEY error is thrown when using an empty key")
   public void storeWithEmptyKey() throws Exception {
-    InternalEvent event = flowRunner("store")
+    BaseEvent event = flowRunner("store")
         .withVariable("key", "")
         .withPayload(TEST_VALUE)
         .run();
@@ -78,7 +78,7 @@ public class StoreTestCase extends ParameterizedObjectStoreTestCase {
     store();
 
     final String overwrittenValue = "Some other value";
-    InternalEvent event = flowRunner("store")
+    BaseEvent event = flowRunner("store")
         .withPayload(overwrittenValue)
         .withVariable("key", KEY)
         .run();
@@ -92,7 +92,7 @@ public class StoreTestCase extends ParameterizedObjectStoreTestCase {
   public void failIfKeyAlreadyPresent() throws Exception {
     store();
 
-    InternalEvent event = flowRunner("idempotentStore")
+    BaseEvent event = flowRunner("idempotentStore")
         .withPayload("Some other value")
         .withVariable("key", KEY)
         .run();
@@ -111,7 +111,7 @@ public class StoreTestCase extends ParameterizedObjectStoreTestCase {
   @Test
   @Description("Verify that operation fails when the value is null")
   public void failOnNullValue() throws Exception {
-    InternalEvent event = flowRunner("storeNullValue").withVariable("failOnNullValue", true).run();
+    BaseEvent event = flowRunner("storeNullValue").withVariable("failOnNullValue", true).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo("NULL_VALUE"));
     assertThat(getObjectStore().contains(KEY), is(false));
   }

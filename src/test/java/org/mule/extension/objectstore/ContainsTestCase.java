@@ -11,7 +11,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.OS_CONNECTOR;
 import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.ObjectStoreStory.CONTAINS;
-import org.mule.runtime.core.api.InternalEvent;
+
+import org.mule.runtime.core.api.event.BaseEvent;
 
 import org.junit.Test;
 import io.qameta.allure.Description;
@@ -34,7 +35,7 @@ public class ContainsTestCase extends ParameterizedObjectStoreTestCase {
   @Test
   @Description("Checks the existence of a given key")
   public void contains() throws Exception {
-    InternalEvent event = flowRunner("contains").withPayload(TEST_VALUE).withVariable("key", KEY).run();
+    BaseEvent event = flowRunner("contains").withPayload(TEST_VALUE).withVariable("key", KEY).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo(true));
     assertThat(getObjectStore().contains(KEY), is(true));
   }
@@ -43,7 +44,7 @@ public class ContainsTestCase extends ParameterizedObjectStoreTestCase {
   @Description("Checks the unexistence of a given key")
   public void containsUnexisting() throws Exception {
     String unexistingKey = "unexistingKey";
-    InternalEvent event = flowRunner("containsUnexisting").withVariable("key", unexistingKey).run();
+    BaseEvent event = flowRunner("containsUnexisting").withVariable("key", unexistingKey).run();
     assertThat(event.getMessage().getPayload().getValue(), equalTo(false));
     assertThat(getObjectStore().contains(unexistingKey), is(false));
   }

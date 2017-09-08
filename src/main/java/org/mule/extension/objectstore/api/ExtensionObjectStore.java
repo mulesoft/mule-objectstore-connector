@@ -9,7 +9,7 @@ package org.mule.extension.objectstore.api;
 import static java.lang.String.format;
 import static org.mule.runtime.api.connection.ConnectionValidationResult.success;
 import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
-import static org.mule.runtime.core.api.InternalEventContext.create;
+import static org.mule.runtime.core.api.event.BaseEventContext.create;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
 import static org.slf4j.LoggerFactory.getLogger;
 import org.mule.extension.objectstore.internal.ObjectStoreRegistry;
@@ -25,7 +25,7 @@ import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreSettings;
 import org.mule.runtime.core.api.DefaultMuleException;
-import org.mule.runtime.core.api.InternalEvent;
+import org.mule.runtime.core.api.event.BaseEvent;
 import org.mule.runtime.core.api.exception.NullExceptionHandler;
 import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.runtime.extension.api.annotation.Alias;
@@ -256,9 +256,9 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
       return new FallbackObjectStoreManagerProvider();
     }
 
-    InternalEvent event =
-        InternalEvent.builder(create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName()),
-                                     NullExceptionHandler.getInstance()))
+    BaseEvent event =
+        BaseEvent.builder(create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName()),
+                                 NullExceptionHandler.getInstance()))
             .message(Message.of("none"))
             .build();
 
