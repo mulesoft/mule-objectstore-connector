@@ -19,7 +19,7 @@
 
     <flow name="privateFlow">
         <idempotent-message-validator idExpression="#[payload]" valueExpression="#[payload]">
-            <os:private-object-store storeName="privateObjectStore"
+            <os:private-object-store alias="privateObjectStore"
                                      entryTtl="20"
                                      entryTtlUnit="MILLISECONDS"
                                      maxEntries="20"

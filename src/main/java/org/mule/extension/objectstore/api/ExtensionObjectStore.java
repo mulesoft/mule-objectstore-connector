@@ -12,6 +12,7 @@ import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
 import static org.slf4j.LoggerFactory.getLogger;
 import org.mule.extension.objectstore.internal.ObjectStoreRegistry;
+import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.connection.ConnectionValidationResult;
@@ -96,6 +97,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Expression(NOT_SUPPORTED)
   private TimeUnit entryTtlUnit;
 
+  private ComponentLocation location;
+
   /**
    * How frequently should the expiration thread run.
    * <p>
@@ -129,7 +132,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Alias("config-ref")
   @ConfigReference(name = "config", namespace = "os")
   @Expression(NOT_SUPPORTED)
-  private String configRef;
+  protected String configRef;
 
   private transient ConnectionProvider<ObjectStoreManager> storeManagerProvider;
   private transient ObjectStoreManager objectStoreManager;
@@ -145,12 +148,16 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     storeManagerProvider = getObjectStoreManagerProvider();
     objectStoreManager = getObjectStoreManager();
 
-    delegateStore = objectStoreManager.createObjectStore(resolveStoreName(), ObjectStoreSettings.builder()
+    final ObjectStoreSettings.Builder settings = ObjectStoreSettings.builder()
         .persistent(persistent)
         .maxEntries(maxEntries)
-        .entryTtl(entryTtlUnit.toMillis(entryTtl))
-        .expirationInterval(expirationIntervalUnit.toMillis(expirationInterval))
-        .build());
+        .expirationInterval(expirationIntervalUnit.toMillis(expirationInterval));
+
+    if (entryTtl != null) {
+      settings.entryTtl(entryTtlUnit.toMillis(entryTtl));
+    }
+
+    delegateStore = objectStoreManager.createObjectStore(resolveStoreName(), settings.build());
 
     registry.register(resolveStoreName(), this);
     started = true;
