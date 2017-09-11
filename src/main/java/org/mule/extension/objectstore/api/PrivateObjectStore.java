@@ -52,7 +52,7 @@ public class PrivateObjectStore extends ExtensionObjectStore {
   }
 
   private String generateStoreName() {
-    if (alias != null) {
+    if (alias != null && alias.trim().length() > 0) {
       return alias;
     }
 
