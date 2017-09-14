@@ -26,7 +26,7 @@ import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreSettings;
-import org.mule.runtime.core.api.DefaultMuleException;
+import org.mule.runtime.api.exception.DefaultMuleException;
 import org.mule.runtime.core.api.event.BaseEvent;
 import org.mule.runtime.core.api.exception.NullExceptionHandler;
 import org.mule.runtime.core.api.extension.ExtensionManager;
@@ -239,7 +239,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     return delegateStore.allKeys();
   }
 
-  private ObjectStoreManager getObjectStoreManager() throws DefaultMuleException {
+  private ObjectStoreManager getObjectStoreManager() throws MuleException {
     ObjectStoreManager storeManager;
     try {
       storeManager = storeManagerProvider.connect();
@@ -261,7 +261,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     return storeManager;
   }
 
-  private ConnectionProvider<ObjectStoreManager> getObjectStoreManagerProvider() throws DefaultMuleException {
+  private ConnectionProvider<ObjectStoreManager> getObjectStoreManagerProvider() throws MuleException {
     if (configRef == null || configRef.trim().length() == 0) {
       return new FallbackObjectStoreManagerProvider();
     }
