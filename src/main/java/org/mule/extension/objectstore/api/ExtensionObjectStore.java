@@ -9,6 +9,7 @@ package org.mule.extension.objectstore.api;
 import static java.lang.String.format;
 import static org.mule.runtime.api.connection.ConnectionValidationResult.success;
 import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
+import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
 import static org.slf4j.LoggerFactory.getLogger;
 import org.mule.extension.objectstore.internal.ObjectStoreRegistry;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.slf4j.Logger;
 
@@ -62,6 +64,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   private ObjectStoreRegistry registry;
 
   @Inject
+  @Named(OBJECT_STORE_MANAGER)
   private ObjectStoreManager runtimeObjectStoreManager;
 
   /**
