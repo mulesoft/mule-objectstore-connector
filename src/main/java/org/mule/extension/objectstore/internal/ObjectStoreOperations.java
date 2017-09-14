@@ -14,6 +14,7 @@ import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NU
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_FOUND;
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
+import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
 import org.mule.extension.objectstore.internal.error.ClearErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.ContainsErrorTypeProvider;
@@ -41,6 +42,7 @@ import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Operations for the ObjectStore connector
@@ -56,6 +58,7 @@ public class ObjectStoreOperations {
   private ObjectStoreRegistry registry;
 
   @Inject
+  @Named(OBJECT_STORE_MANAGER)
   private ObjectStoreManager runtimeObjectStoreManager;
 
   /**
