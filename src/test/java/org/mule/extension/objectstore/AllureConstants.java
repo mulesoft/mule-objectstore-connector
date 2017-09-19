@@ -19,6 +19,8 @@ public interface AllureConstants {
       String REMOVE = "Remove";
       String CONTAINS = "Contains";
       String CLEAR = "Clear";
+      String RETRIEVE_ALL = "Retrieve All";
+      String RETRIEVE_ALL_KEYS = "Retrieve All Keys";
       String IMPLICIT_STORE = "Use default partition as Implicit Store";
     }
   }

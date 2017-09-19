@@ -40,6 +40,7 @@ import org.mule.runtime.extension.api.runtime.config.ConfigurationInstance;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -237,6 +238,11 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Override
   public List<String> allKeys() throws ObjectStoreException {
     return delegateStore.allKeys();
+  }
+
+  @Override
+  public Map<String, Serializable> retrieveAll() throws ObjectStoreException {
+    return delegateStore.retrieveAll();
   }
 
   private ObjectStoreManager getObjectStoreManager() throws MuleException {

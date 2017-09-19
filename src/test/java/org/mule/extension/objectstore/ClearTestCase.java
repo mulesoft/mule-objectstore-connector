@@ -6,6 +6,7 @@
  */
 package org.mule.extension.objectstore;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.OS_CONNECTOR;
@@ -35,6 +36,13 @@ public class ClearTestCase extends ParameterizedObjectStoreTestCase {
     getObjectStore().store(KEY, TEST_VALUE);
     flowRunner("clear").run();
     assertThat(getObjectStore().contains(KEY), is(false));
+  }
+
+  @Test
+  @Description("Verifies correct error type when trying to retrieve all from a store which doesn't exists")
+  public void clearUnexisting() throws Exception {
+    String response = flowRunner("unexistingStore").run().getMessage().getPayload().getValue().toString();
+    assertThat(response, equalTo("STORE_NOT_FOUND"));
   }
 
 }
