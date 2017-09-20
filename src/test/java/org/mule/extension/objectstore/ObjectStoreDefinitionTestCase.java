@@ -18,7 +18,6 @@ import static org.mockito.Mockito.verify;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 
 import org.mule.extension.objectstore.api.ExtensionObjectStore;
-import org.mule.runtime.api.artifact.Registry;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreSettings;
 
@@ -27,19 +26,9 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-
 public class ObjectStoreDefinitionTestCase extends AbstractObjectStoreTestCase {
 
-  @Inject
-  private Registry registry;
-
   private ObjectStoreManager objectStoreManager;
-
-  @Override
-  protected boolean doTestClassInjection() {
-    return true;
-  }
 
   @Override
   protected String[] getConfigFiles() {
