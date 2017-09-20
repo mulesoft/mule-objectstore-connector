@@ -6,6 +6,7 @@
  */
 package org.mule.extension.objectstore;
 
+import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -15,22 +16,18 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
+
 import org.mule.extension.objectstore.api.ExtensionObjectStore;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreSettings;
-import org.mule.runtime.core.api.MuleContext;
-import org.mule.runtime.core.api.config.ConfigurationBuilder;
-import org.mule.runtime.core.api.config.builders.AbstractConfigurationBuilder;
-
-import java.util.List;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
+
+import java.util.Map;
 
 public class ObjectStoreDefinitionTestCase extends AbstractObjectStoreTestCase {
 
-  @Mock
   private ObjectStoreManager objectStoreManager;
 
   @Override
@@ -43,16 +40,9 @@ public class ObjectStoreDefinitionTestCase extends AbstractObjectStoreTestCase {
   }
 
   @Override
-  protected void addBuilders(List<ConfigurationBuilder> builders) {
-    super.addBuilders(builders);
+  protected Map<String, Object> getStartUpRegistryObjects() {
     objectStoreManager = mock(ObjectStoreManager.class, RETURNS_DEEP_STUBS);
-    builders.add(new AbstractConfigurationBuilder() {
-
-      @Override
-      protected void doConfigure(MuleContext muleContext) throws Exception {
-        muleContext.getRegistry().registerObject(OBJECT_STORE_MANAGER, objectStoreManager);
-      }
-    });
+    return singletonMap(OBJECT_STORE_MANAGER, objectStoreManager);
   }
 
   @Test
@@ -71,7 +61,7 @@ public class ObjectStoreDefinitionTestCase extends AbstractObjectStoreTestCase {
   }
 
   private void assertStoreDefinition(String storeName, boolean persistent) {
-    ExtensionObjectStore objectStore = muleContext.getRegistry().lookupObject(storeName);
+    ExtensionObjectStore objectStore = registry.<ExtensionObjectStore>lookupByName(storeName).get();
     assertThat(objectStore, is(notNullValue()));
     ArgumentCaptor<ObjectStoreSettings> settingsCaptor = ArgumentCaptor.forClass(ObjectStoreSettings.class);
     verify(objectStoreManager).createObjectStore(eq(storeName), settingsCaptor.capture());
