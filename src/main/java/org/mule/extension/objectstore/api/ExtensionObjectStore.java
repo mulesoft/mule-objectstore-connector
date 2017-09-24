@@ -27,7 +27,7 @@ import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreSettings;
 import org.mule.runtime.api.exception.DefaultMuleException;
-import org.mule.runtime.core.api.event.BaseEvent;
+import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.runtime.core.api.exception.NullExceptionHandler;
 import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.runtime.extension.api.annotation.Alias;
@@ -272,8 +272,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
       return new FallbackObjectStoreManagerProvider();
     }
 
-    BaseEvent event =
-        BaseEvent.builder(create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName()),
+    CoreEvent event =
+        CoreEvent.builder(create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName()),
                                  NullExceptionHandler.getInstance()))
             .message(Message.of("none"))
             .build();
