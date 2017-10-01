@@ -273,9 +273,9 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     }
 
     CoreEvent event = CoreEvent.builder(create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName()),
-                                       NullExceptionHandler.getInstance()))
-            .message(Message.of("none"))
-            .build();
+                                               NullExceptionHandler.getInstance()))
+        .message(Message.of("none"))
+        .build();
 
     ConfigurationInstance configurationProvider;
     try {
