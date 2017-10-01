@@ -10,7 +10,7 @@ import static java.lang.String.format;
 import static org.mule.runtime.api.connection.ConnectionValidationResult.success;
 import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
-import static org.mule.runtime.core.api.event.BaseEventContext.create;
+import static org.mule.runtime.core.api.event.EventContextFactory.create;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
 import static org.slf4j.LoggerFactory.getLogger;
 import org.mule.extension.objectstore.internal.ObjectStoreRegistry;
@@ -272,9 +272,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
       return new FallbackObjectStoreManagerProvider();
     }
 
-    CoreEvent event =
-        CoreEvent.builder(create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName()),
-                                 NullExceptionHandler.getInstance()))
+    CoreEvent event = CoreEvent.builder(create(resolveStoreName(), "dummy", fromSingleComponent(resolveStoreName()),
+                                       NullExceptionHandler.getInstance()))
             .message(Message.of("none"))
             .build();
 
