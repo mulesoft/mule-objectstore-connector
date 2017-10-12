@@ -134,7 +134,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Optional
   @DisplayName("Configuration Reference")
   @Alias("config-ref")
-  @ConfigReference(name = "config", namespace = "os")
+  @ConfigReference(name = "CONFIG", namespace = "OS")
   @Expression(NOT_SUPPORTED)
   protected String configRef;
 
