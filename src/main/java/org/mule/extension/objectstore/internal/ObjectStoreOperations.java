@@ -30,6 +30,7 @@ import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreNotAvailableException;
+import org.mule.runtime.extension.api.annotation.dsl.xml.ParameterDsl;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.Optional;
@@ -94,7 +95,7 @@ public class ObjectStoreOperations {
                     @Content TypedValue<Serializable> value,
                     @Optional(defaultValue = "false") boolean failIfPresent,
                     @Optional(defaultValue = "true") boolean failOnNullValue,
-                    @ObjectStoreReference @Optional String objectStore) {
+                    @ObjectStoreReference @Optional @ParameterDsl(allowInlineDefinition = false) ObjectStore objectStore) {
 
     if (!validateValue(value, failOnNullValue)) {
       return;
@@ -106,8 +107,8 @@ public class ObjectStoreOperations {
       if (os.contains(key)) {
         if (failIfPresent) {
           throw new ModuleException(KEY_ALREADY_EXISTS, new ObjectAlreadyExistsException(
-                                                                                         createStaticMessage("ObjectStore already contains an object for key '"
-                                                                                             + key + "'")));
+              createStaticMessage("ObjectStore already contains an object for key '"
+                                      + key + "'")));
         } else {
           os.remove(key);
         }
@@ -149,9 +150,9 @@ public class ObjectStoreOperations {
         return defaultValue;
       } else {
         throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
-                                                                                                            "ObjectStore '%s' doesn't contain any value for key '%s' and default value was not provided or "
-                                                                                                                + "resolved to a null value.",
-                                                                                                            objectStore, key))));
+            "ObjectStore '%s' doesn't contain any value for key '%s' and default value was not provided or "
+                + "resolved to a null value.",
+            objectStore, key))));
       }
     });
 
@@ -183,8 +184,8 @@ public class ObjectStoreOperations {
     withLockedKey(objectStore, key, os -> {
       if (!os.contains(key)) {
         throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
-                                                                                                            "ObjectStore doesn't contain any value for key '%s'",
-                                                                                                            key))));
+            "ObjectStore doesn't contain any value for key '%s'",
+            key))));
       }
 
       os.remove(key);
@@ -258,7 +259,7 @@ public class ObjectStoreOperations {
     if (value == null || value.getValue() == null) {
       if (failOnNullValue) {
         throw new ModuleException(NULL_VALUE, new IllegalArgumentException(
-                                                                           "A null value was provided. Please provided a non-null value or set the 'failOnNullValue' parameter to 'false'"));
+            "A null value was provided. Please provided a non-null value or set the 'failOnNullValue' parameter to 'false'"));
       } else {
         return false;
       }
@@ -275,28 +276,25 @@ public class ObjectStoreOperations {
 
   private <T> T withLockedKey(String objectStoreName, String key, ObjectStoreTask<T> task) {
     ObjectStore<Serializable> objectStore = getObjectStore(objectStoreName);
-    Lock lock = getKeyLock(key, objectStoreName);
+    return withLockedKey(objectStore, key, task);
+  }
+
+  private <T> T withLockedKey(ObjectStore<Serializable> objectStore, String key, ObjectStoreTask<T> task) {
+    Lock lock = getKeyLock(key, "TBD");
     lock.lock();
     try {
       return task.run(objectStore);
     } catch (ObjectAlreadyExistsException e) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "Key '%s' is already present on object store '%s'", key,
-                                                           objectStoreName)),
+      throw new ModuleException(createStaticMessage(format("Key '%s' is already present on object store", key)),
                                 KEY_ALREADY_EXISTS, e);
     } catch (ObjectStoreNotAvailableException e) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "ObjectStore '%s' is not available at the moment", objectStoreName)),
+      throw new ModuleException(createStaticMessage(format("ObjectStore is not available at the moment")),
                                 STORE_NOT_AVAILABLE, e);
     } catch (ObjectDoesNotExistException e) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "Key '%s' does not exists on object store '%s'", key,
-                                                           objectStoreName)),
+      throw new ModuleException(createStaticMessage(format("Key '%s' does not exists on object store", key)),
                                 KEY_NOT_FOUND, e);
     } catch (ObjectStoreException e) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "Found error trying to access ObjectStore '%s'", objectStoreName)),
-                                ANY, e);
+      throw new ModuleException(createStaticMessage("Found error trying to access ObjectStore"), ANY, e);
     } finally {
       lock.unlock();
     }
@@ -310,11 +308,11 @@ public class ObjectStoreOperations {
       return task.run(objectStore);
     } catch (ObjectStoreNotAvailableException e) {
       throw new ModuleException(createStaticMessage(format(
-                                                           "ObjectStore '%s' is not available at the moment", objectStoreName)),
+          "ObjectStore '%s' is not available at the moment", objectStoreName)),
                                 STORE_NOT_AVAILABLE, e);
     } catch (ObjectStoreException e) {
       throw new ModuleException(createStaticMessage(format(
-                                                           "Found error trying to access ObjectStore '%s'", objectStoreName)),
+          "Found error trying to access ObjectStore '%s'", objectStoreName)),
                                 ANY, e);
     } finally {
       lock.unlock();
@@ -337,8 +335,8 @@ public class ObjectStoreOperations {
     ObjectStore<Serializable> objectStore = registry.get(objectStoreName);
     if (objectStore == null) {
       throw new ModuleException(createStaticMessage(format(
-                                                           "ObjectStore '%s' was not defined. Is there a matching <os:object-store>?",
-                                                           objectStoreName)),
+          "ObjectStore '%s' was not defined. Is there a matching <os:object-store>?",
+          objectStoreName)),
                                 STORE_NOT_FOUND);
     }
 
