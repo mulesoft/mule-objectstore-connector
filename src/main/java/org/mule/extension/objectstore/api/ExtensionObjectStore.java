@@ -306,4 +306,32 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
       return success();
     }
   }
+
+  public Integer getMaxEntries() {
+    return maxEntries;
+  }
+
+  public Long getEntryTtl() {
+    return entryTtl;
+  }
+
+  public TimeUnit getEntryTtlUnit() {
+    return entryTtlUnit;
+  }
+
+  public ComponentLocation getLocation() {
+    return location;
+  }
+
+  public Long getExpirationInterval() {
+    return expirationInterval;
+  }
+
+  public TimeUnit getExpirationIntervalUnit() {
+    return expirationIntervalUnit;
+  }
+
+  public String getConfigRef() {
+    return configRef;
+  }
 }
