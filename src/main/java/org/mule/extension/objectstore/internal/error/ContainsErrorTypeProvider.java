@@ -8,7 +8,6 @@ package org.mule.extension.objectstore.internal.error;
 
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.INVALID_KEY;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_FOUND;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
 import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
 
@@ -30,7 +29,6 @@ public class ContainsErrorTypeProvider implements ErrorTypeProvider {
     Set<ErrorTypeDefinition> errors = new HashSet<>();
 
     errors.add(INVALID_KEY);
-    errors.add(STORE_NOT_FOUND);
     errors.add(STORE_NOT_AVAILABLE);
 
     return errors;

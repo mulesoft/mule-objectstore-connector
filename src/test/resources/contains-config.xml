@@ -14,15 +14,4 @@
     <flow name="containsUnexisting">
         <os:contains key="#[vars.key]" objectStore="${objectStore}" />
     </flow>
-
-    <flow name="unexistingStore">
-        <try>
-            <os:contains key="key" objectStore="notThere" />
-            <error-handler>
-                <on-error-continue type="OS:STORE_NOT_FOUND">
-                    <set-payload value="STORE_NOT_FOUND" />
-                </on-error-continue>
-            </error-handler>
-        </try>
-    </flow>
 </mule>

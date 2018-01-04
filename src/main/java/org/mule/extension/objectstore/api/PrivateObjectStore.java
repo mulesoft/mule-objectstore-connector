@@ -30,9 +30,7 @@ import java.util.UUID;
  * @since 1.0
  */
 @Alias("privateObjectStore")
-@TypeDsl(allowTopLevelDefinition = false, allowInlineDefinition = true,
-    substitutionGroup = "mule:abstract-private-object-store",
-    baseType = "mule:abstractObjectStoreType")
+@TypeDsl(substitutionGroup = "mule:abstract-private-object-store", baseType = "mule:abstractObjectStoreType")
 @Stereotype(ObjectStoreStereotype.class)
 public class PrivateObjectStore extends ExtensionObjectStore {
 

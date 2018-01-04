@@ -22,6 +22,7 @@ import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.lifecycle.Stoppable;
 import org.mule.runtime.api.message.Message;
+import org.mule.runtime.api.meta.NamedObject;
 import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
@@ -53,7 +54,7 @@ import org.slf4j.Logger;
  *
  * @since 1.0
  */
-public abstract class ExtensionObjectStore implements ObjectStore<Serializable>, Startable, Stoppable {
+public abstract class ExtensionObjectStore implements ObjectStore<Serializable>, Startable, Stoppable, NamedObject {
 
   private static final Logger LOGGER = getLogger(ExtensionObjectStore.class);
   private boolean started = false;
@@ -243,6 +244,11 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Override
   public Map<String, Serializable> retrieveAll() throws ObjectStoreException {
     return delegateStore.retrieveAll();
+  }
+
+  @Override
+  public String getName() {
+    return resolveStoreName();
   }
 
   private ObjectStoreManager getObjectStoreManager() throws MuleException {

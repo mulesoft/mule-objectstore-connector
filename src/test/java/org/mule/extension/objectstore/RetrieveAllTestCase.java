@@ -67,11 +67,4 @@ public class RetrieveAllTestCase extends ParameterizedObjectStoreTestCase {
         (Map<String, Serializable>) flowRunner("retrieveAll").run().getMessage().getPayload().getValue();
     assertThat(retrieved, equalTo(values));
   }
-
-  @Test
-  @Description("Verifies correct error type when trying to retrieve all from a store which doesn't exists")
-  public void retrieveAllFromUnexisting() throws Exception {
-    String response = flowRunner("unexistingStore").run().getMessage().getPayload().getValue().toString();
-    assertThat(response, equalTo("STORE_NOT_FOUND"));
-  }
 }
