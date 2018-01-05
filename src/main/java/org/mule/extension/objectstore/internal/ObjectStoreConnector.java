@@ -16,6 +16,7 @@ import org.mule.runtime.extension.api.annotation.SubTypeMapping;
 import org.mule.runtime.extension.api.annotation.connectivity.ConnectionProviders;
 import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypes;
+import org.mule.runtime.extension.api.annotation.param.RefName;
 
 /**
  * Connector that provides functionality to access and create {@link ObjectStore} instances.
@@ -30,4 +31,10 @@ import org.mule.runtime.extension.api.annotation.error.ErrorTypes;
 @Xml(prefix = "os")
 public class ObjectStoreConnector {
 
+  @RefName
+  private String name;
+
+  public String getConfigName() {
+    return name;
+  }
 }

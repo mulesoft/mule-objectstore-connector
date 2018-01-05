@@ -13,6 +13,7 @@ import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAG
 import static org.mule.runtime.core.api.event.EventContextFactory.create;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
 import static org.slf4j.LoggerFactory.getLogger;
+import org.mule.extension.objectstore.internal.ObjectStoreConnector;
 import org.mule.extension.objectstore.internal.ObjectStoreRegistry;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.connection.ConnectionException;
@@ -33,6 +34,7 @@ import org.mule.runtime.core.api.exception.NullExceptionHandler;
 import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Expression;
+import org.mule.runtime.extension.api.annotation.dsl.xml.ParameterDsl;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
@@ -137,7 +139,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Alias("config-ref")
   @ConfigReference(name = "CONFIG", namespace = "OS")
   @Expression(NOT_SUPPORTED)
-  protected String configRef;
+  @ParameterDsl(allowInlineDefinition = false)
+  protected ObjectStoreConnector config;
 
   private transient ConnectionProvider<ObjectStoreManager> storeManagerProvider;
   private transient ObjectStoreManager objectStoreManager;
@@ -185,7 +188,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
         storeManagerProvider.disconnect(objectStoreManager);
       } catch (Exception e) {
         LOGGER.warn(format("Found exception trying to disconnect from ObjectStoreManager obtained through config '%s'",
-                           configRef),
+                           getConfigName()),
                     e);
       }
     }
@@ -256,7 +259,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     try {
       storeManager = storeManagerProvider.connect();
     } catch (ConnectionException e) {
-      throw new DefaultMuleException(format("Could not obtain ObjectStore Manager from config '%s'", configRef), e);
+      throw new DefaultMuleException(format("Could not obtain ObjectStore Manager from config '%s'", getConfigName()), e);
     }
 
     ConnectionValidationResult validationResult = storeManagerProvider.validate(storeManager);
@@ -267,14 +270,14 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
       throw new DefaultMuleException(format("Obtained invalid connection from ObjectStore config '%s'.\n"
           + "Error Type: %s.\nMessage: %s",
-                                            configRef, errorType, validationResult.getMessage()));
+                                            getConfigName(), errorType, validationResult.getMessage()));
     }
 
     return storeManager;
   }
 
   private ConnectionProvider<ObjectStoreManager> getObjectStoreManagerProvider() throws MuleException {
-    if (configRef == null || configRef.trim().length() == 0) {
+    if (config == null) {
       return new FallbackObjectStoreManagerProvider();
     }
 
@@ -285,14 +288,18 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
     ConfigurationInstance configurationProvider;
     try {
-      configurationProvider = extensionManager.getConfiguration(configRef, event);
+      configurationProvider = extensionManager.getConfiguration(getConfigName(), event);
     } catch (IllegalArgumentException e) {
       throw new DefaultMuleException(format("ObjectStore '%s' points to configuration '%s' which doesn't exits",
-                                            resolveStoreName(), configRef),
+                                            resolveStoreName(), getConfigName()),
                                      e);
     }
 
     return configurationProvider.getConnectionProvider().orElseGet(FallbackObjectStoreManagerProvider::new);
+  }
+
+  protected String getConfigName() {
+    return config != null ? config.getConfigName() : "default";
   }
 
   private class FallbackObjectStoreManagerProvider implements ConnectionProvider<ObjectStoreManager> {
@@ -335,9 +342,5 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   public TimeUnit getExpirationIntervalUnit() {
     return expirationIntervalUnit;
-  }
-
-  public String getConfigRef() {
-    return configRef;
   }
 }

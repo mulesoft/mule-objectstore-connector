@@ -60,6 +60,7 @@ public class PrivateObjectStore extends ExtensionObjectStore {
     }
 
     String uuid = UUID.randomUUID().toString();
+    String configRef = getConfigName();
     if (configRef != null) {
       uuid = configRef + "/" + uuid;
     }
