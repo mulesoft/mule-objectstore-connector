@@ -106,8 +106,8 @@ public class ObjectStoreOperations {
       if (os.contains(key)) {
         if (failIfPresent) {
           throw new ModuleException(KEY_ALREADY_EXISTS, new ObjectAlreadyExistsException(
-              createStaticMessage("ObjectStore already contains an object for key '"
-                                      + key + "'")));
+                                                                                         createStaticMessage("ObjectStore already contains an object for key '"
+                                                                                             + key + "'")));
         } else {
           os.remove(key);
         }
@@ -149,9 +149,9 @@ public class ObjectStoreOperations {
         return defaultValue;
       } else {
         throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
-            "ObjectStore '%s' doesn't contain any value for key '%s' and default value was not provided or "
-                + "resolved to a null value.",
-            objectStore, key))));
+                                                                                                            "ObjectStore '%s' doesn't contain any value for key '%s' and default value was not provided or "
+                                                                                                                + "resolved to a null value.",
+                                                                                                            objectStore, key))));
       }
     });
 
@@ -183,8 +183,8 @@ public class ObjectStoreOperations {
     withLockedKey(objectStore, key, os -> {
       if (!os.contains(key)) {
         throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
-            "ObjectStore doesn't contain any value for key '%s'",
-            key))));
+                                                                                                            "ObjectStore doesn't contain any value for key '%s'",
+                                                                                                            key))));
       }
 
       os.remove(key);
@@ -204,7 +204,8 @@ public class ObjectStoreOperations {
    */
   @Summary("Returns whether the key is present or not")
   @Throws(ContainsErrorTypeProvider.class)
-  public boolean contains(String key, @Optional @ParameterDsl(allowInlineDefinition = false) ObjectStore<Serializable> objectStore) {
+  public boolean contains(String key,
+                          @Optional @ParameterDsl(allowInlineDefinition = false) ObjectStore<Serializable> objectStore) {
     validateKey(key);
     return withLockedKey(objectStore, key, os -> os.contains(key));
   }
@@ -230,7 +231,8 @@ public class ObjectStoreOperations {
    */
   @Throws(AvailabilityErrorTypeProvider.class)
   public List<String> retrieveAllKeys(
-      @Optional @ParameterDsl(allowInlineDefinition = false) ObjectStore<Serializable> objectStore) {
+                                      @Optional @ParameterDsl(
+                                          allowInlineDefinition = false) ObjectStore<Serializable> objectStore) {
     return withLockedStore(objectStore, os -> os.allKeys());
   }
 
@@ -242,7 +244,8 @@ public class ObjectStoreOperations {
    */
   @Throws(AvailabilityErrorTypeProvider.class)
   public Map<String, Serializable> retrieveAll(
-      @Optional @ParameterDsl(allowInlineDefinition = false) ObjectStore<Serializable> objectStore) {
+                                               @Optional @ParameterDsl(
+                                                   allowInlineDefinition = false) ObjectStore<Serializable> objectStore) {
     return withLockedStore(objectStore, os -> {
       Map<String, Serializable> all = os.retrieveAll();
       all.entrySet().forEach(entry -> {
@@ -260,7 +263,7 @@ public class ObjectStoreOperations {
     if (value == null || value.getValue() == null) {
       if (failOnNullValue) {
         throw new ModuleException(NULL_VALUE, new IllegalArgumentException(
-            "A null value was provided. Please provided a non-null value or set the 'failOnNullValue' parameter to 'false'"));
+                                                                           "A null value was provided. Please provided a non-null value or set the 'failOnNullValue' parameter to 'false'"));
       } else {
         return false;
       }

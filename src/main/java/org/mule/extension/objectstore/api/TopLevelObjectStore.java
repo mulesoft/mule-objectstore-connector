@@ -31,5 +31,5 @@ public class TopLevelObjectStore extends ExtensionObjectStore {
   protected String resolveStoreName() {
     return name;
   }
-  
+
 }
