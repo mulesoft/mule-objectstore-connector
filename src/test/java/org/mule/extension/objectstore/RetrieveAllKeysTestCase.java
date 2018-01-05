@@ -6,7 +6,6 @@
  */
 package org.mule.extension.objectstore;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -50,12 +49,5 @@ public class RetrieveAllKeysTestCase extends ParameterizedObjectStoreTestCase {
     List<String> retrieved = (List<String>) flowRunner("retrieveAllKeys").run().getMessage().getPayload().getValue();
     assertThat(retrieved, hasSize(values.size()));
     retrieved.forEach(key -> assertThat(values.containsKey(key), is(true)));
-  }
-
-  @Test
-  @Description("Verifies correct error type when trying to retrieve all keys from a store which doesn't exists")
-  public void retrieveAllKeysFromUnexisting() throws Exception {
-    String response = flowRunner("unexistingStore").run().getMessage().getPayload().getValue().toString();
-    assertThat(response, equalTo("STORE_NOT_FOUND"));
   }
 }

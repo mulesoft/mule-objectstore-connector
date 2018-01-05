@@ -30,8 +30,7 @@ import java.util.UUID;
  * @since 1.0
  */
 @Alias("privateObjectStore")
-@TypeDsl(allowTopLevelDefinition = false, allowInlineDefinition = true, substitutionGroup = "mule:abstract-private-object-store",
-    baseType = "mule:abstractObjectStoreType")
+@TypeDsl(substitutionGroup = "mule:abstract-private-object-store", baseType = "mule:abstractObjectStoreType")
 @Stereotype(ObjectStoreStereotype.class)
 public class PrivateObjectStore extends ExtensionObjectStore {
 
@@ -46,6 +45,10 @@ public class PrivateObjectStore extends ExtensionObjectStore {
 
   private LazyValue<String> storeName = new LazyValue<>(this::generateStoreName);
 
+  public String getAlias() {
+    return alias;
+  }
+
   @Override
   protected String resolveStoreName() {
     return storeName.get();
@@ -57,6 +60,7 @@ public class PrivateObjectStore extends ExtensionObjectStore {
     }
 
     String uuid = UUID.randomUUID().toString();
+    String configRef = getConfigName();
     if (configRef != null) {
       uuid = configRef + "/" + uuid;
     }

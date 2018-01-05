@@ -39,13 +39,4 @@ public class ContainsTestCase extends ParameterizedObjectStoreTestCase {
     assertThat(event.getMessage().getPayload().getValue(), equalTo(true));
     assertThat(getObjectStore().contains(KEY), is(true));
   }
-
-  @Test
-  @Description("Checks the unexistence of a given key")
-  public void containsUnexisting() throws Exception {
-    String unexistingKey = "unexistingKey";
-    CoreEvent event = flowRunner("containsUnexisting").withVariable("key", unexistingKey).run();
-    assertThat(event.getMessage().getPayload().getValue(), equalTo(false));
-    assertThat(getObjectStore().contains(unexistingKey), is(false));
-  }
 }

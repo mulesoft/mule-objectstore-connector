@@ -7,7 +7,6 @@
 package org.mule.extension.objectstore.internal.error;
 
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_FOUND;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
 import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
 
@@ -27,8 +26,6 @@ public class AvailabilityErrorTypeProvider implements ErrorTypeProvider {
   @Override
   public Set<ErrorTypeDefinition> getErrorTypes() {
     Set<ErrorTypeDefinition> errors = new HashSet<>();
-
-    errors.add(STORE_NOT_FOUND);
     errors.add(STORE_NOT_AVAILABLE);
 
     return errors;

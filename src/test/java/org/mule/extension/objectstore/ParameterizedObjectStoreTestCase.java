@@ -11,16 +11,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.store.ObjectStore;
-import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.tck.junit4.rule.SystemProperty;
 import org.mule.test.runner.RunnerDelegateTo;
 
 import java.io.Serializable;
 import java.util.Collection;
 
-import io.qameta.allure.Description;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
@@ -79,15 +76,4 @@ public abstract class ParameterizedObjectStoreTestCase extends AbstractObjectSto
   protected ObjectStore<Serializable> getObjectStore() {
     return objectStoreManager.getObjectStore(objectStoreName);
   }
-
-  @Test
-  @Description("Verify that pointing to an undefined ObjectStore results in a STORE_NOT_FOUND error")
-  public void undefinedStore() throws Exception {
-    CoreEvent event = flowRunner("unexistingStore")
-        .withPayload("")
-        .run();
-
-    assertThat(event.getMessage().getPayload().getValue(), equalTo("STORE_NOT_FOUND"));
-  }
-
 }

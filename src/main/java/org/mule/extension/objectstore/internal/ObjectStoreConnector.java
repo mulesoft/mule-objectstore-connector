@@ -10,12 +10,13 @@ import org.mule.extension.objectstore.api.PrivateObjectStore;
 import org.mule.extension.objectstore.api.TopLevelObjectStore;
 import org.mule.extension.objectstore.internal.error.ObjectStoreErrors;
 import org.mule.runtime.api.store.ObjectStore;
-import org.mule.runtime.extension.api.annotation.Export;
 import org.mule.runtime.extension.api.annotation.Extension;
 import org.mule.runtime.extension.api.annotation.Operations;
+import org.mule.runtime.extension.api.annotation.SubTypeMapping;
 import org.mule.runtime.extension.api.annotation.connectivity.ConnectionProviders;
 import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypes;
+import org.mule.runtime.extension.api.annotation.param.RefName;
 
 /**
  * Connector that provides functionality to access and create {@link ObjectStore} instances.
@@ -26,8 +27,14 @@ import org.mule.runtime.extension.api.annotation.error.ErrorTypes;
 @Operations(ObjectStoreOperations.class)
 @ConnectionProviders(MuleObjectStoreManagerProvider.class)
 @ErrorTypes(ObjectStoreErrors.class)
-@Export(classes = {TopLevelObjectStore.class, PrivateObjectStore.class})
+@SubTypeMapping(baseType = ObjectStore.class, subTypes = {TopLevelObjectStore.class, PrivateObjectStore.class})
 @Xml(prefix = "os")
 public class ObjectStoreConnector {
 
+  @RefName
+  private String name;
+
+  public String getConfigName() {
+    return name;
+  }
 }

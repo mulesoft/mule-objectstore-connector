@@ -37,11 +37,6 @@ public enum ObjectStoreErrors implements ErrorTypeDefinition<ObjectStoreErrors> 
   KEY_NOT_FOUND,
 
   /**
-   * The operation refers to a global {@link ObjectStore} which does not exists
-   */
-  STORE_NOT_FOUND,
-
-  /**
    * The operation refers to an {@link ObjectStore} which cannot be accessed at this time
    */
   STORE_NOT_AVAILABLE

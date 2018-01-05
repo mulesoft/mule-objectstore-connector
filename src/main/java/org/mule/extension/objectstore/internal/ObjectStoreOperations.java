@@ -12,7 +12,6 @@ import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KE
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_NOT_FOUND;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NULL_VALUE;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_FOUND;
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
@@ -22,6 +21,7 @@ import org.mule.extension.objectstore.internal.error.RemoveErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.RetrieveErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.StoreErrorTypeProvider;
 import org.mule.runtime.api.lock.LockFactory;
+import org.mule.runtime.api.meta.NamedObject;
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.store.ObjectAlreadyExistsException;
@@ -30,11 +30,11 @@ import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreNotAvailableException;
+import org.mule.runtime.extension.api.annotation.dsl.xml.ParameterDsl;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
-import org.mule.runtime.extension.api.annotation.param.reference.ObjectStoreReference;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 
@@ -94,7 +94,7 @@ public class ObjectStoreOperations {
                     @Content TypedValue<Serializable> value,
                     @Optional(defaultValue = "false") boolean failIfPresent,
                     @Optional(defaultValue = "true") boolean failOnNullValue,
-                    @ObjectStoreReference @Optional String objectStore) {
+                    @Optional @ParameterDsl(allowInlineDefinition = false) ObjectStore objectStore) {
 
     if (!validateValue(value, failOnNullValue)) {
       return;
@@ -139,7 +139,7 @@ public class ObjectStoreOperations {
   @Summary("Retrieves the value stored for the given key")
   public Result<Serializable, Void> retrieve(String key,
                                              @Content @Optional TypedValue<Serializable> defaultValue,
-                                             @ObjectStoreReference @Optional String objectStore) {
+                                             @Optional @ParameterDsl(allowInlineDefinition = false) ObjectStore objectStore) {
 
     validateKey(key);
     Object value = withLockedKey(objectStore, key, os -> {
@@ -178,7 +178,7 @@ public class ObjectStoreOperations {
    */
   @Throws(RemoveErrorTypeProvider.class)
   @Summary("Removes the value associated to the given key")
-  public void remove(String key, @ObjectStoreReference @Optional String objectStore) {
+  public void remove(String key, @Optional @ParameterDsl(allowInlineDefinition = false) ObjectStore objectStore) {
     validateKey(key);
     withLockedKey(objectStore, key, os -> {
       if (!os.contains(key)) {
@@ -204,7 +204,8 @@ public class ObjectStoreOperations {
    */
   @Summary("Returns whether the key is present or not")
   @Throws(ContainsErrorTypeProvider.class)
-  public boolean contains(String key, @ObjectStoreReference @Optional String objectStore) {
+  public boolean contains(String key,
+                          @Optional @ParameterDsl(allowInlineDefinition = false) ObjectStore<Serializable> objectStore) {
     validateKey(key);
     return withLockedKey(objectStore, key, os -> os.contains(key));
   }
@@ -215,7 +216,7 @@ public class ObjectStoreOperations {
    * @param objectStore A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
    */
   @Throws(AvailabilityErrorTypeProvider.class)
-  public void clear(@ObjectStoreReference @Optional String objectStore) {
+  public void clear(@Optional @ParameterDsl(allowInlineDefinition = false) ObjectStore<Serializable> objectStore) {
     withLockedStore(objectStore, os -> {
       os.clear();
       return null;
@@ -229,7 +230,9 @@ public class ObjectStoreOperations {
    * @return A List with all the keys or an empty one if the object store is empty
    */
   @Throws(AvailabilityErrorTypeProvider.class)
-  public List<String> retrieveAllKeys(@ObjectStoreReference @Optional String objectStore) {
+  public List<String> retrieveAllKeys(
+                                      @Optional @ParameterDsl(
+                                          allowInlineDefinition = false) ObjectStore<Serializable> objectStore) {
     return withLockedStore(objectStore, os -> os.allKeys());
   }
 
@@ -240,7 +243,9 @@ public class ObjectStoreOperations {
    * @return All the key value pairs or an empty Map if no values are present
    */
   @Throws(AvailabilityErrorTypeProvider.class)
-  public Map<String, Serializable> retrieveAll(@ObjectStoreReference @Optional String objectStore) {
+  public Map<String, Serializable> retrieveAll(
+                                               @Optional @ParameterDsl(
+                                                   allowInlineDefinition = false) ObjectStore<Serializable> objectStore) {
     return withLockedStore(objectStore, os -> {
       Map<String, Serializable> all = os.retrieveAll();
       all.entrySet().forEach(entry -> {
@@ -273,76 +278,60 @@ public class ObjectStoreOperations {
     }
   }
 
-  private <T> T withLockedKey(String objectStoreName, String key, ObjectStoreTask<T> task) {
-    ObjectStore<Serializable> objectStore = getObjectStore(objectStoreName);
-    Lock lock = getKeyLock(key, objectStoreName);
+  private <T> T withLockedKey(ObjectStore<Serializable> objectStore, String key, ObjectStoreTask<T> task) {
+    objectStore = nullSafe(objectStore);
+    Lock lock = getKeyLock(key, objectStore);
     lock.lock();
     try {
       return task.run(objectStore);
     } catch (ObjectAlreadyExistsException e) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "Key '%s' is already present on object store '%s'", key,
-                                                           objectStoreName)),
+      throw new ModuleException(createStaticMessage(format("Key '%s' is already present on object store", key)),
                                 KEY_ALREADY_EXISTS, e);
     } catch (ObjectStoreNotAvailableException e) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "ObjectStore '%s' is not available at the moment", objectStoreName)),
+      throw new ModuleException(createStaticMessage(format("ObjectStore is not available at the moment")),
                                 STORE_NOT_AVAILABLE, e);
     } catch (ObjectDoesNotExistException e) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "Key '%s' does not exists on object store '%s'", key,
-                                                           objectStoreName)),
+      throw new ModuleException(createStaticMessage(format("Key '%s' does not exists on object store", key)),
                                 KEY_NOT_FOUND, e);
     } catch (ObjectStoreException e) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "Found error trying to access ObjectStore '%s'", objectStoreName)),
-                                ANY, e);
+      throw new ModuleException(createStaticMessage("Found error trying to access ObjectStore"), ANY, e);
     } finally {
       lock.unlock();
     }
   }
 
-  private <T> T withLockedStore(String objectStoreName, ObjectStoreTask<T> task) {
-    ObjectStore<Serializable> objectStore = getObjectStore(objectStoreName);
-    Lock lock = getStoreLock(objectStoreName);
+  private <T> T withLockedStore(ObjectStore<Serializable> objectStore, ObjectStoreTask<T> task) {
+    objectStore = nullSafe(objectStore);
+    Lock lock = getStoreLock(objectStore);
     lock.lock();
     try {
       return task.run(objectStore);
     } catch (ObjectStoreNotAvailableException e) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "ObjectStore '%s' is not available at the moment", objectStoreName)),
-                                STORE_NOT_AVAILABLE, e);
+      throw new ModuleException(createStaticMessage("ObjectStore '%s' is not available at the moment"), STORE_NOT_AVAILABLE, e);
     } catch (ObjectStoreException e) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "Found error trying to access ObjectStore '%s'", objectStoreName)),
-                                ANY, e);
+      throw new ModuleException(createStaticMessage("Found error trying to access ObjectStore"), ANY, e);
     } finally {
       lock.unlock();
     }
   }
 
-  private Lock getKeyLock(String key, String objectStoreName) {
-    return lockFactory.createLock("_objectStoreConnector_" + objectStoreName + "_" + key);
+  private Lock getKeyLock(String key, ObjectStore<Serializable> objectStore) {
+
+    return lockFactory.createLock(getStoreLockKey(objectStore) + "_" + key);
   }
 
-  private Lock getStoreLock(String objectStoreName) {
-    return lockFactory.createLock("_objectStoreConnector_" + objectStoreName);
+  private String getStoreLockKey(ObjectStore<Serializable> objectStore) {
+    return "_objectStoreConnector_" + (objectStore instanceof NamedObject
+        ? ((NamedObject) objectStore).getName()
+        : objectStore.toString());
   }
 
-  private ObjectStore<Serializable> getObjectStore(String objectStoreName) {
-    if (objectStoreName == null) {
-      return runtimeObjectStoreManager.getDefaultPartition();
-    }
+  private Lock getStoreLock(ObjectStore<Serializable> objectStore) {
+    return lockFactory.createLock(getStoreLockKey(objectStore));
+  }
 
-    ObjectStore<Serializable> objectStore = registry.get(objectStoreName);
-    if (objectStore == null) {
-      throw new ModuleException(createStaticMessage(format(
-                                                           "ObjectStore '%s' was not defined. Is there a matching <os:object-store>?",
-                                                           objectStoreName)),
-                                STORE_NOT_FOUND);
-    }
-
-    return objectStore;
+  private ObjectStore<Serializable> nullSafe(ObjectStore<Serializable> objectStore) {
+    return objectStore != null ? objectStore : runtimeObjectStoreManager.getDefaultPartition();
   }
 
   @FunctionalInterface

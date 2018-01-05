@@ -18,7 +18,8 @@ import org.mule.runtime.extension.api.stereotype.ObjectStoreStereotype;
  * @since 1.0
  */
 @Alias("objectStore")
-@TypeDsl(allowTopLevelDefinition = true, allowInlineDefinition = false, substitutionGroup = "mule:abstract-object-store",
+@TypeDsl(allowTopLevelDefinition = true, allowInlineDefinition = false,
+    substitutionGroup = "mule:global-abstract-object-store",
     baseType = "mule:abstractObjectStoreType")
 @Stereotype(ObjectStoreStereotype.class)
 public class TopLevelObjectStore extends ExtensionObjectStore {
@@ -30,4 +31,5 @@ public class TopLevelObjectStore extends ExtensionObjectStore {
   protected String resolveStoreName() {
     return name;
   }
+
 }

@@ -10,15 +10,4 @@
         <os:retrieve-all objectStore="${objectStore}"/>
     </flow>
 
-    <flow name="unexistingStore">
-        <try>
-            <os:retrieve-all-keys objectStore="notThere" />
-            <error-handler>
-                <on-error-continue type="OS:STORE_NOT_FOUND">
-                    <set-payload value="STORE_NOT_FOUND" />
-                </on-error-continue>
-            </error-handler>
-        </try>
-    </flow>
-
 </mule>
