@@ -7,12 +7,14 @@
 package org.mule.extension.objectstore.internal;
 
 import static org.mule.runtime.api.connection.ConnectionValidationResult.success;
+import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.connection.ConnectionValidationResult;
 import org.mule.runtime.api.store.ObjectStoreManager;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * A {@link ConnectionProvider} which returns the runtime's default {@link ObjectStoreManager}
@@ -22,6 +24,7 @@ import javax.inject.Inject;
 public class MuleObjectStoreManagerProvider implements ConnectionProvider<ObjectStoreManager> {
 
   @Inject
+  @Named(OBJECT_STORE_MANAGER)
   private ObjectStoreManager objectStoreManager;
 
   @Override
