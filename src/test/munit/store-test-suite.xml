@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<munit:config name="store-test-suite.xml" />
+	
+	
+	<munit:before-test name="beforeStoreTest" doc:id="30af555e-9965-497c-b7d8-f5920454281f" >
+		<set-variable value="keyName"  variableName="myKey"/>
+		<set-variable value="My Value" variableName="myValue"/>
+		<os:clear/>
+	</munit:before-test>
+	<munit:after-suite name="afterBeforeTest" doc:id="4c0a2f6a-7dd4-4fc7-8ef8-42a5a62c6111" >
+		<os:clear/>
+	</munit:after-suite>
+	<munit:test name="storeWithEmptyKey" doc:id="c07bbf8f-c64e-4fbc-92d8-6880921e81a9" description="Verify that INVALID_KEY error is thrown when using an empty key" expectedErrorType="OS:INVALID_KEY">
+		<munit:behavior >
+			<set-variable value="" variableName="emptyKey"/>
+		</munit:behavior>
+		<munit:execution >
+			<os:store doc:name="Store" doc:id="d84d9353-6bb0-4ccb-b88f-f1e464fde0d3" key="#[vars.emptyKey]">
+				<os:value ><![CDATA[My Value]]></os:value>
+			</os:store>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="skipNullValue" doc:id="b0ba1198-af51-4ad1-8651-7650d2bae2fe" description="Verify that operation skips when the value is null">
+		<munit:execution >
+			<os:store doc:name="Store" doc:id="bb74c930-650b-4ec5-92b3-6faf9359a51e" key="#[vars.myKey]" failOnNullValue="false">
+				<os:value ><![CDATA[#[vars.missingKey]]]></os:value>
+			</os:store>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="d284c2ad-ccfb-4168-b34f-e6544817536c" expression="#[payload]" is="#[MunitTools::equalTo('')]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="failOnNullValue" doc:id="acca4209-d295-49a0-9ce3-0e6e5ed5e611" description="Verify that operation fails when the value is null">
+		<munit:execution >
+			<try doc:name="Try" doc:id="d8063dcb-e3f4-426e-a9c7-cfad2fde0138" >
+				<os:store doc:name="Store" doc:id="e98a8c88-db64-451b-bb7b-54a26220e9d9" key="myNullValue">
+				<os:value><![CDATA[#[vars.missingKey]]]></os:value>
+			</os:store>
+				<munit-tools:fail doc:name="Fail" doc:id="3397f778-6794-41a2-8a38-2256a26e4e24" message="An OS:NULL_VALUE error was expected"/>
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5236ca98-913d-4582-8e33-61c3632e83c1" type="OS:NULL_VALUE"/>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<os:contains doc:name="Contains" doc:id="78887ce2-17d7-42a7-823b-f06d003ca65d" key="myNullValue"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="b5a8b1c8-1cc6-4043-9194-164e4802100b" expression="#[payload]" is="#[MunitTools::equalTo(false)]"/>
+		</munit:validation>
+	</munit:test>
+</mule>

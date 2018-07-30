@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<munit:config name="retrieve-test-suite.xml" />
+	
+	
+	<munit:before-test name="beforeRetrieveTest" doc:id="30af555e-9965-497c-b7d8-f5920454281f" >
+		<set-variable value="keyName"  variableName="myKey"/>
+		<set-variable value="My Value" variableName="myValue"/>
+	</munit:before-test>
+	<munit:test name="retrieveEmptyKey" doc:id="a1405887-c903-44c7-b310-50d860703b42" expectedErrorType="OS:INVALID_KEY" description="Verify that retrieving a value with an empty key throws INVALID_KEY error">
+		<munit:behavior >
+			<set-variable value="" doc:name="Set Variable" doc:id="00605721-f15b-40e0-aad4-74ee7e10704b" variableName="emptyKey"/>
+		</munit:behavior>
+		<munit:execution >
+			<os:retrieve doc:name="Retrieve" doc:id="caf11bf6-7492-4ff0-918b-e20a6c6f1ccb" key="#[vars.emptyKey]"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="retrieveUnexisting" doc:id="ff69ce90-221a-46a6-8d60-241982f44b68" description="Verify that retrieving a value for which key doesn't exists throws KEY_NOT_FOUND error" expectedErrorType="OS:KEY_NOT_FOUND">
+		<munit:execution >
+			<os:retrieve doc:name="Retrieve" doc:id="6057d6c7-8930-45e6-a26d-6a534098ce2f" key="missaNotThereJarJar"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="retrieveUnexistingWithDefault" doc:id="f39d7548-0a29-43d2-86aa-f5c8ea1e8b04" description="Verify that retrieving a value for which key doesn't exists returns the default value but such value is not stored">
+		<munit:execution >
+			<os:retrieve doc:name="Retrieve" doc:id="71501bb6-3cdf-453c-9eb4-9631162653ec" key="#[vars.myKey]">
+				<os:default-value ><![CDATA[MyDefault]]></os:default-value>
+			</os:retrieve>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="3942854b-cb20-4bde-86f9-43897d12f4c4" expression="#[payload]" is="#[MunitTools::equalTo('MyDefault')]"/>
+			<try doc:name="Try" doc:id="f143c56a-0c29-4ed9-8b44-ac208a3942a0" >
+				<os:retrieve doc:name="Retrieve" doc:id="f637a8bb-c1c0-48cc-b982-fdabd834f48b" key="vars.missingKey"/>
+				<munit-tools:fail doc:name="Fail" doc:id="eedddd39-2616-459f-92e8-f01defe459fc" message="An OS:KEY_NOT_FOUND exception should've been thrown"/>
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="e4958ebf-6104-4b2b-a825-9b87d264266c" type="OS:KEY_NOT_FOUND">
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="retrieveDefaultValueMaintainingDataType" doc:id="d064aadd-cb97-4e1c-becc-249ccbff963f" description="Verify that retrieving a value for which key doesn't exists returns the default value with a custom media type but such value is not stored">
+	<munit:behavior>
+			<set-payload value="#[vars.myValue]" mimeType="text/plain"/>
+		</munit:behavior>
+		<munit:execution >
+			<os:retrieve key="#[vars.myKey]">
+				<os:default-value><![CDATA[#[payload]]]></os:default-value>
+			</os:retrieve>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that expression="#[payload]" is="#[MunitTools::equalTo(vars.myValue)]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[MunitTools::withMediaType('text/plain')]"/>
+			<try>
+				<os:retrieve key="#[vars.myKey]"/>
+				<munit-tools:fail doc:name="Fail" message="An OS:KEY_NOT_FOUND exception should've been thrown"/>
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="e4958ebf-6104-4b2b-a825-9b87d264266c" type="OS:KEY_NOT_FOUND">
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:validation>
+	</munit:test>
+</mule>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<munit:config name="clear-test-suite.xml" />
+	
+	<munit:before-test name="beforeClearTest" doc:id="30af555e-9965-497c-b7d8-f5920454281f" >
+		<set-variable value="keyName"  variableName="myKey"/>
+		<set-variable value="My Value" variableName="myValue"/>
+	</munit:before-test>
+	<munit:test name="clear" doc:id="652d5900-a4b5-4f56-b67c-52a160d4ad94" description="Clears the entire store">
+		<munit:behavior >
+			<os:store doc:name="Store First" doc:id="5ee5f59a-c037-4a6f-91a1-40ade2b19be0" key="#[vars.myKey]">
+				<os:value ><![CDATA[#[vars.myValue]]]></os:value>
+			</os:store>
+			<os:store doc:name="Store Second" doc:id="63313fce-95f8-4dbb-afed-6f1f5939f94f" key="otherKey" >
+				<os:value ><![CDATA[Other Value]]></os:value>
+			</os:store>
+			<os:contains doc:name="Before Contains First" key="#[vars.myKey]" target="containsFirstBefore" />
+			<os:contains doc:name="Before Contains Second" key="otherKey" target="containsSecondBefore" />
+		</munit:behavior>
+		<munit:execution>
+			<os:clear doc:name="Clear" doc:id="60559b2e-267c-4307-92b8-cf4123672064" />
+		</munit:execution>
+		<munit:validation >
+			<os:contains doc:name="After Contains First" key="#[vars.myKey]" target="containsFirstAfter" />
+			<os:contains doc:name="After Contains Second" key="otherKey" target="containsSecondAfter" />
+			<munit-tools:assert-that doc:name="Assert First" expression="#[vars.containsFirstBefore and not vars.containsFirstAfter]" is="#[MunitTools::equalTo(true)]"/>
+			<munit-tools:assert-that doc:name="Assert Second" expression="#[vars.containsSecondBefore and not vars.containsSecondAfter]" is="#[MunitTools::equalTo(true)]"/>
+		</munit:validation>
+	</munit:test>
+
+</mule>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<munit:config name="retrieve-all-test-suite.xml" />
+
+	<munit:before-test name="beforeRetrieveAllTest" doc:id="e510a323-ccdb-4bdd-be3b-f427f6c15297" >
+		<set-variable value="firstKey" doc:name="Set First Key" variableName="firstKey"/>
+		<set-variable value="firstValue" doc:name="Set First Value" variableName="firstValue"/>
+		<os:store doc:name="Store First" key="#[vars.firstKey]">
+			<os:value ><![CDATA[#[vars.firstValue]]]></os:value>
+		</os:store>
+		<set-variable value="secondKey" doc:name="Set Second Key" variableName="secondKey"/>
+		<set-variable value="secondValue" doc:name="Set Second Value" variableName="secondValue"/>
+		<os:store doc:name="Store Second" key="#[vars.secondKey]">
+			<os:value ><![CDATA[#[vars.secondValue]]]></os:value>
+		</os:store>
+	</munit:before-test>
+	<munit:after-test name="afterRetrieveAllTest" >
+		<os:clear doc:name="Clear" />
+	</munit:after-test>
+	<munit:test name="retrieveAllValues" doc:id="852fc405-1a95-4b74-ae23-927c50afe7aa" >
+		<munit:execution >
+			<os:retrieve-all doc:name="Retrieve all" doc:id="90e5320d-0c80-422c-9cac-d18552a5f63c" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="53a935ac-a281-4def-a6fa-d38ef4c3857b" >
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalTo({
+(vars.firstKey): vars.firstValue, 
+(vars.secondKey): vars.secondValue
+})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="retrieveAllKeys" doc:id="4d330005-2fec-4932-9069-286f13a9feb4" >
+		<munit:execution >
+			<os:retrieve-all-keys doc:name="Retrieve all keys" doc:id="5f8f2d8e-78a5-41d9-a718-861dec85bb89" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="dce18782-8c78-4eda-a28a-5f6b59953fa6" >
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalTo([vars.firstKey, vars.secondKey])]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="retrieveEmpty" doc:id="94dfd3a1-ce02-421e-b30e-a2321552be30" >
+		<munit:behavior >
+			<os:clear doc:name="Clear" doc:id="4c0b90a5-64cf-466f-a25e-51b91f314bd9" />
+		</munit:behavior>
+		<munit:execution >
+			<os:retrieve-all-keys doc:name="Retrieve all keys" doc:id="332616e4-e7f4-4a60-bee8-9b57a8a8705d" target="allKeys"/>
+			<os:retrieve-all doc:name="Retrieve all" doc:id="5f60e00a-dd9e-4f73-a59a-0f43800b85a2" target="allValues"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert Empty Keys" doc:id="8fa1aa50-a2b5-4214-a2c8-dd0c664dba66" >
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+vars.allKeys must beEmpty()]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:assert doc:name="Assert Empty Values" doc:id="eaed7f2b-33db-4ab8-b8d0-446872cd6a71" >
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+vars.allValues must beEmpty()]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	
+</mule>

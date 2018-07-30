@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<munit:config name="store-and-retrieve-test-suite.xml" />
+	
+	
+	<munit:before-test name="beforeStoreAndRetrieveTest" doc:id="30af555e-9965-497c-b7d8-f5920454281f" >
+		<set-variable value="keyName"  variableName="myKey"/>
+		<set-variable value="My Value" variableName="myValue"/>
+		<os:clear/>
+	</munit:before-test>
+	<munit:after-suite name="afterStoreAndRetrieveTest" doc:id="4c0a2f6a-7dd4-4fc7-8ef8-42a5a62c6111" >
+		<os:clear/>
+	</munit:after-suite>
+	<munit:test name="storeAndRetrieveMaintainingDataType" doc:id="d2fc84ef-9b2c-4af3-93a0-182207941bd7" description="Retrieves a value which was stored with custom media type and such type is preserved">
+		<munit:behavior >
+			<set-variable value="My Value" variableName="value"/>
+			<set-payload value="#[vars.value]" mimeType="text/plain"/>
+			<os:store doc:name="Store" key="#[vars.myKey]">
+				<os:value ><![CDATA[#[payload]]]></os:value>
+			</os:store>
+		</munit:behavior>
+		<munit:execution >
+			<os:retrieve doc:name="Retrieve" doc:id="6f9b8a78-9d57-4488-a6ae-9cbe0ed8dea6" key="#[vars.myKey]"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that expression="#[payload]" is="#[MunitTools::equalTo(vars.value)]"/>
+			<munit-tools:assert-that expression="#[payload]" is="#[MunitTools::withMediaType('text/plain')]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="storeAndRetrieveExistingWithDefault" doc:id="635143af-900b-44aa-95c4-185249f59c58" description="Verify that retrieve returns the correct value, even if defaultValue was provided">
+	<munit:behavior >
+			<os:store doc:name="Store" key="#[vars.myKey]">
+				<os:value ><![CDATA[#[vars.myValue]]]></os:value>
+			</os:store>
+		</munit:behavior>
+		<munit:execution >
+			<os:retrieve key="#[vars.myKey]">
+				<os:default-value ><![CDATA[My Default Value]]></os:default-value>
+			</os:retrieve>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that expression="#[payload]" is="#[MunitTools::equalTo(vars.myValue)]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="failIfKeyAlreadyPresent"  description="Fail when a storing a value which a key already exists">
+		<munit:behavior >
+			<set-variable value="Another Value" variableName="finalValue"/>
+			<os:store key="#[vars.myKey]">
+				<os:value ><![CDATA[#[vars.myValue]]]></os:value>
+			</os:store>
+		</munit:behavior>
+		<munit:execution >
+			<try doc:name="Try" doc:id="79ca250b-c941-4c4b-8b1b-69c7bc7da16b" >
+				<os:store key="#[vars.myKey]" failIfPresent="true">
+				<os:value><![CDATA[Some other value]]></os:value>
+			</os:store>
+				<munit-tools:fail doc:name="Fail" doc:id="d11c7e94-4d9d-4a10-9df4-6325d6178881" message="Error OS:KEY_ALREADY_EXISTS should've been thrown"/>
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a0b9f832-3463-4c59-9bb0-c21bb1f07958" type="OS:KEY_ALREADY_EXISTS">
+						<set-payload value="KEY_ALREADY_EXISTS" doc:name="Set Payload" doc:id="e058a31a-fbff-4919-9651-6e32038e9c3e" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<os:retrieve doc:name="Retrieve" doc:id="051d51d5-3c07-4408-b139-73b11a527097" key="#[vars.myKey]"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="0b0a7fd4-af3d-490a-9c06-2343a4197ac9" expression="#[payload]" is="#[MunitTools::equalTo(vars.myValue)]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="overwriteValue" doc:id="3e0d3ac1-a73f-4680-b933-de3e58611a5b" description="Overwrite a value for which a key already exists">
+		<munit:behavior>
+			<set-variable value="Another Value" variableName="finalValue" />
+			<os:store doc:name="Store" doc:id="28f69dd3-a5b5-4e78-b739-f2852d82904c" key="#[vars.myKey]">
+				<os:value><![CDATA[#[vars.myValue]]]></os:value>
+			</os:store>
+		</munit:behavior>
+		<munit:execution>
+			<os:store doc:name="Store" doc:id="df6d135a-8925-4a5f-b5f6-4329f00b9b44" key="#[vars.myKey]">
+				<os:value>#[vars.finalValue]</os:value>
+			</os:store>
+		</munit:execution>
+		<munit:validation>
+			<os:retrieve doc:name="Retrieve" doc:id="d45b8b78-2710-4a47-81ba-d95ffe5941cf" key="#[vars.myKey]" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="0b0a7fd4-af3d-490a-9c06-2343a4197ac9" expression="#[payload]" is="#[MunitTools::equalTo(vars.finalValue)]" />
+		</munit:validation>
+	</munit:test>
+</mule>

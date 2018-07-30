@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<munit:config name="remove-test-suite.xml" />
+	<munit:before-test name="beforeRemoveTest" doc:id="e510a323-ccdb-4bdd-be3b-f427f6c15297" >
+		<set-variable value="MyKeyName" doc:name="Set Variable" doc:id="5e7f8975-8c5a-4b84-a7b5-d56dff9bd8e4" variableName="myKey"/>
+		<os:store doc:name="Store" doc:id="cc313f53-bb1b-4ad3-9c04-14dd7d19edfa" key="#[vars.myKey]">
+			<os:value ><![CDATA[My Value]]></os:value>
+		</os:store>
+	</munit:before-test>
+	<munit:after-test name="afterRemoveTest" doc:id="6cf75554-e37d-463e-9d56-288a9e5c6389" >
+		<os:clear doc:name="Clear" doc:id="604059d4-ac54-4bff-9404-5f46631ca4cf" />
+	</munit:after-test>
+	<munit:test name="removeWithEmptyKey" doc:id="eb8ac9a5-efb1-43a7-afb1-4eb27b7a43fd" expectedErrorType="OS:INVALID_KEY" description="Removing object using an empty key throws INVALID_KEY error">
+		<munit:behavior >
+			<set-variable value=" " doc:name="Set Empty Variable" doc:id="3ed05e65-1f7e-49bb-8e8b-fee231712991" variableName="emptyKey"/>
+		</munit:behavior>
+		<munit:execution >
+			<os:remove doc:name="Remove" doc:id="45bd81f1-4575-4798-95b0-2543dd727016" key="#[vars.emptyKey]"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="removeUnexistingKey" doc:id="8bc5ac07-5deb-4648-bafe-e3c36b31047a" description="Removing object using a key which doesn't exists throws KEY_NOT_FOUND error" expectedErrorType="OS:KEY_NOT_FOUND">
+		<munit:execution >
+			<os:remove doc:name="Remove" doc:id="54974295-9d28-47a0-99d1-e0e96c187909" key="missingKey"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="removeObject" doc:id="fc8e76f0-abcd-475e-8541-845b4fd67dd5" description="Remove object of a given key">
+		<munit:behavior >
+			<os:contains doc:name="Contains Before" doc:id="eaba643b-b413-48c7-a5f4-34f6947971a5" key="#[vars.myKey]" target="containsBefore"/>
+		</munit:behavior>
+		<munit:execution >
+			<os:remove doc:name="Remove" doc:id="fa650acb-5cf6-4be7-8d2c-e7c6a4b6d39d" key="#[vars.myKey]"/>
+		</munit:execution>
+		<munit:validation >
+			<os:contains doc:name="Contains After" doc:id="edc1a6db-e0a2-494a-a2e9-bab6bd8c0ca4" key="#[vars.myKey]" target="containsAfter"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="8cfd043a-c86c-4998-ae89-f94fdb5e89f8" expression="#[vars.containsBefore and not vars.containsAfter]" is="#[MunitTools::equalTo(true)]"/>
+		</munit:validation>
+	</munit:test>
+
+</mule>
