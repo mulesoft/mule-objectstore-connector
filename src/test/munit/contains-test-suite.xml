@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<munit:config name="contains-test-suite.xml" />
+	
+	<munit:before-test name="beforeContainsTest" doc:id="30af555e-9965-497c-b7d8-f5920454281f" >
+		<set-variable value="keyName"  variableName="myKey"/>
+		<set-variable value="My Value" variableName="myValue"/>
+		<os:clear doc:name="Clear" doc:id="5c189320-9e1c-4535-8c96-665005f769d3" />
+	</munit:before-test>
+	<munit:after-test name="afterContainsTest" doc:id="5b44437f-cce5-43ce-8f00-90b6e14ddbc8" >
+		<os:clear doc:name="Clear" doc:id="a3aee61a-49f5-4301-b84a-b405d25b588b" />
+	</munit:after-test>
+	<munit:test name="contains" doc:id="652d5900-a4b5-4f56-b67c-52a160d4ad94" description="Checks the existence of existing key">
+		<munit:behavior >
+			<os:store doc:name="Store" doc:id="5ee5f59a-c037-4a6f-91a1-40ade2b19be0" key="#[vars.myKey]">
+				<os:value ><![CDATA[#[vars.myValue]]]></os:value>
+			</os:store>
+		</munit:behavior>
+		<munit:execution >
+			<os:contains doc:name="Contains" doc:id="d9220c86-857f-4524-96be-11a9fca4a3de" key="#[vars.myKey]"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="e56d23d5-df8e-4191-a624-38986736f41d" expression="#[payload]" is="#[MunitTools::equalTo(true)]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="notContains" doc:id="cb450575-c8ea-4490-9561-7383134ff1d1" >
+		<munit:execution >
+			<os:contains doc:name="Contains" doc:id="5d28635b-3459-4469-99c8-617c91409317" key="#[vars.myKey]"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="95d799b4-0112-4697-a087-ee1f9d82bb0a" expression="#[payload]" is="#[MunitTools::equalTo(false)]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="containsWithInvalidKey" doc:id="b7f68ed1-b396-4596-8cbf-6e49f35c2afd" expectedErrorType="OS:INVALID_KEY">
+		<munit:execution >
+			<os:contains doc:name="Contains" doc:id="332ad0a7-f5c9-4750-882a-4f89b6c7b600" key="#[vars.nullKey]"/>
+		</munit:execution>
+	</munit:test>
+
+</mule>
