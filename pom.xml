@@ -71,6 +71,7 @@
                         <targetRuntime>MULE:4.1.2</targetRuntime>
                         <targetRuntime>MULE:4.1.3</targetRuntime>
                         <targetRuntime>MULE:4.1.4-SNAPSHOT</targetRuntime>
+                        <targetRuntime>MULE:4.2.0-SNAPSHOT</targetRuntime>
                     </targetRuntimes>
                 </configuration>
                 <dependencies>
