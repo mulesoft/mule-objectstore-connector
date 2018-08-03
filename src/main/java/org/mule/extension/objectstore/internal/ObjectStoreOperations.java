@@ -154,7 +154,7 @@ public class ObjectStoreOperations {
         throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
                                                                                                             "ObjectStore '%s' doesn't contain any value for key '%s' and default value was not provided or "
                                                                                                                 + "resolved to a null value.",
-                                                                                                            objectStore, key))));
+                                                                                                            os, key))));
       }
     });
 
