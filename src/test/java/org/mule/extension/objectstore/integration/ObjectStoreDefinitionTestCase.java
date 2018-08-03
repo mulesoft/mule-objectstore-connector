@@ -4,7 +4,7 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.extension.objectstore;
+package org.mule.extension.objectstore.integration;
 
 import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.HOURS;

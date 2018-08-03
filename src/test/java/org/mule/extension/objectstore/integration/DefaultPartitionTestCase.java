@@ -4,7 +4,7 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.extension.objectstore;
+package org.mule.extension.objectstore.integration;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -12,6 +12,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.OS_CONNECTOR;
 import static org.mule.extension.objectstore.AllureConstants.ObjectStoreFeature.ObjectStoreStory.IMPLICIT_STORE;
+
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.core.api.event.CoreEvent;

@@ -4,7 +4,7 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.extension.objectstore;
+package org.mule.extension.objectstore.integration;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -32,8 +32,8 @@ public class ClearTestCase extends ParameterizedObjectStoreTestCase {
   @Test
   @Description("Clears the entire store")
   public void clear() throws Exception {
-    getObjectStore().store(KEY, TEST_VALUE);
+    getObjectStore().store(AbstractObjectStoreTestCase.KEY, AbstractObjectStoreTestCase.TEST_VALUE);
     flowRunner("clear").run();
-    assertThat(getObjectStore().contains(KEY), is(false));
+    assertThat(getObjectStore().contains(AbstractObjectStoreTestCase.KEY), is(false));
   }
 }
