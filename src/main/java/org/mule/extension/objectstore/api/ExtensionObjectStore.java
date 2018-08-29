@@ -172,7 +172,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   }
 
   @Override
-  public void stop() throws MuleException {
+  public void stop() {
     registry.unregister(resolveStoreName());
 
     if (delegateStore != null) {
@@ -201,51 +201,61 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   @Override
   public boolean contains(String key) throws ObjectStoreException {
+    checkDelegatedStoreInitialized();
     return delegateStore.contains(key);
   }
 
   @Override
   public void store(String key, Serializable value) throws ObjectStoreException {
+    checkDelegatedStoreInitialized();
     delegateStore.store(key, value);
   }
 
   @Override
   public Serializable retrieve(String key) throws ObjectStoreException {
+    checkDelegatedStoreInitialized();
     return delegateStore.retrieve(key);
   }
 
   @Override
   public Serializable remove(String key) throws ObjectStoreException {
+    checkDelegatedStoreInitialized();
     return delegateStore.remove(key);
   }
 
   @Override
   public boolean isPersistent() {
+    checkDelegatedStoreInitialized();
     return delegateStore.isPersistent();
   }
 
   @Override
   public void clear() throws ObjectStoreException {
+    checkDelegatedStoreInitialized();
     delegateStore.clear();
   }
 
   @Override
   public void open() throws ObjectStoreException {
+    checkDelegatedStoreInitialized();
     delegateStore.open();
   }
 
   @Override
   public void close() throws ObjectStoreException {
+    checkDelegatedStoreInitialized();
     delegateStore.close();
   }
 
   @Override
   public List<String> allKeys() throws ObjectStoreException {
+    checkDelegatedStoreInitialized();
     return delegateStore.allKeys();
   }
 
   @Override
   public Map<String, Serializable> retrieveAll() throws ObjectStoreException {
+    checkDelegatedStoreInitialized();
     return delegateStore.retrieveAll();
   }
 
@@ -296,6 +306,13 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     }
 
     return configurationProvider.getConnectionProvider().orElseGet(FallbackObjectStoreManagerProvider::new);
+  }
+
+  //TODO: this can be removed after MULE-15209 is fixed.
+  private void checkDelegatedStoreInitialized() throws IllegalStateException {
+    if (delegateStore == null) {
+      throw new IllegalStateException(format("Can't perform operation on %s. ObjectStore not initialized.", resolveStoreName()));
+    }
   }
 
   protected String getConfigName() {
