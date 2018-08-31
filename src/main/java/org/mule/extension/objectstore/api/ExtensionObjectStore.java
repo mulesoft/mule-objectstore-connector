@@ -311,7 +311,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   //TODO: this can be removed after MULE-15209 is fixed.
   private void checkDelegatedStoreInitialized() throws IllegalStateException {
     if (delegateStore == null) {
-      throw new IllegalStateException(format("Can't perform operation on %s. ObjectStore not initialized.", resolveStoreName()));
+      throw new IllegalStateException(format("Can't perform operation on '%s'. ObjectStore not initialized.",
+                                             resolveStoreName()));
     }
   }
 
