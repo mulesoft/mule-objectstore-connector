@@ -29,6 +29,17 @@
         </idempotent-message-validator>
     </flow>
 
+    <flow name="privateFlowNoAlias">
+        <idempotent-message-validator idExpression="#[payload]" valueExpression="#[payload]">
+            <os:private-object-store entryTtl="20"
+                                     entryTtlUnit="MILLISECONDS"
+                                     maxEntries="20"
+                                     persistent="false"
+                                     expirationInterval="20"
+                                     expirationIntervalUnit="MILLISECONDS"/>
+        </idempotent-message-validator>
+    </flow>
+
     <flow name="implicitFlow">
         <idempotent-message-validator idExpression="#[payload]" valueExpression="#[payload]" storePrefix="implicitObjectStore"/>
     </flow>
