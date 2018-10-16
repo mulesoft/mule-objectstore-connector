@@ -16,15 +16,14 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
-
 import org.mule.extension.objectstore.api.ExtensionObjectStore;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreSettings;
 
+import java.util.Map;
+
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-
-import java.util.Map;
 
 public class ObjectStoreDefinitionTestCase extends AbstractObjectStoreTestCase {
 
@@ -64,7 +63,7 @@ public class ObjectStoreDefinitionTestCase extends AbstractObjectStoreTestCase {
     ExtensionObjectStore objectStore = registry.<ExtensionObjectStore>lookupByName(storeName).get();
     assertThat(objectStore, is(notNullValue()));
     ArgumentCaptor<ObjectStoreSettings> settingsCaptor = ArgumentCaptor.forClass(ObjectStoreSettings.class);
-    verify(objectStoreManager).createObjectStore(eq(storeName), settingsCaptor.capture());
+    verify(objectStoreManager).getOrCreateObjectStore(eq(storeName), settingsCaptor.capture());
 
     ObjectStoreSettings settings = settingsCaptor.getValue();
     assertThat(settings, is(notNullValue()));
