@@ -13,6 +13,7 @@ import org.mule.runtime.api.util.LazyValue;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.dsl.xml.TypeDsl;
+import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.Placement;
 import org.mule.runtime.extension.api.annotation.param.stereotype.Stereotype;
@@ -39,6 +40,7 @@ public class PrivateObjectStore extends ExtensionObjectStore {
    * to be easier to identify this store. If not provided, Mule will auto generate an ID.
    */
   @Parameter
+  @Optional
   @Expression(NOT_SUPPORTED)
   @Placement(tab = ADVANCED_TAB)
   private String alias;

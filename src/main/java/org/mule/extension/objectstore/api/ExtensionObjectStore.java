@@ -165,9 +165,14 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
       settings.entryTtl(entryTtlUnit.toMillis(entryTtl));
     }
 
-    delegateStore = objectStoreManager.createObjectStore(resolveStoreName(), settings.build());
+    final String storeName = resolveStoreName();
+    if (registry.get(storeName) != null) {
+      throw new IllegalArgumentException(format("An Object Store was already defined with the name '%s'", storeName));
 
-    registry.register(resolveStoreName(), this);
+    }
+
+    delegateStore = objectStoreManager.getOrCreateObjectStore(storeName, settings.build());
+    registry.register(storeName, this);
     started = true;
   }
 
