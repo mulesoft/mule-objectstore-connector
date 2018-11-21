@@ -1,5 +1,5 @@
 Map pipelineParams = [ "mavenTestGoal" : "clean verify",
-                       "mavenDeployGoal" : "clean install -DskipTests -DskipITs -Dinvoker.skip=true"
+                       "mavenDeployGoal" : "clean deploy -DskipTests -DskipITs -Dinvoker.skip=true"
 ]
 
 runtimeExtensionsBuild(pipelineParams)
