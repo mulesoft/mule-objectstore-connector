@@ -14,6 +14,7 @@ import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NU
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
+import static org.mule.runtime.api.meta.model.operation.ExecutionType.BLOCKING;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
 import org.mule.extension.objectstore.internal.error.AvailabilityErrorTypeProvider;
@@ -34,6 +35,7 @@ import org.mule.runtime.api.store.ObjectStoreNotAvailableException;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.dsl.xml.ParameterDsl;
 import org.mule.runtime.extension.api.annotation.error.Throws;
+import org.mule.runtime.extension.api.annotation.execution.Execution;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
@@ -92,6 +94,7 @@ public class ObjectStoreOperations {
    */
   @Throws(StoreErrorTypeProvider.class)
   @Summary("Stores the given value using the given key")
+  @Execution(BLOCKING)
   public void store(String key,
                     @Content TypedValue<Serializable> value,
                     @Optional(defaultValue = "false") boolean failIfPresent,
@@ -139,6 +142,7 @@ public class ObjectStoreOperations {
    */
   @Throws(RetrieveErrorTypeProvider.class)
   @Summary("Retrieves the value stored for the given key")
+  @Execution(BLOCKING)
   public Result<Serializable, Void> retrieve(String key,
                                              @Content @Optional TypedValue<Serializable> defaultValue,
                                              @Optional @ParameterDsl(
@@ -181,6 +185,7 @@ public class ObjectStoreOperations {
    */
   @Throws(RemoveErrorTypeProvider.class)
   @Summary("Removes the value associated to the given key")
+  @Execution(BLOCKING)
   public void remove(String key,
                      @Optional @ParameterDsl(allowInlineDefinition = false) @Expression(NOT_SUPPORTED) ObjectStore objectStore) {
     validateKey(key);
@@ -208,6 +213,7 @@ public class ObjectStoreOperations {
    */
   @Summary("Returns whether the key is present or not")
   @Throws(ContainsErrorTypeProvider.class)
+  @Execution(BLOCKING)
   public boolean contains(String key,
                           @Optional @ParameterDsl(
                               allowInlineDefinition = false) @Expression(NOT_SUPPORTED) ObjectStore<Serializable> objectStore) {
@@ -221,6 +227,7 @@ public class ObjectStoreOperations {
    * @param objectStore A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
    */
   @Throws(AvailabilityErrorTypeProvider.class)
+  @Execution(BLOCKING)
   public void clear(@Optional @ParameterDsl(
       allowInlineDefinition = false) @Expression(NOT_SUPPORTED) ObjectStore<Serializable> objectStore) {
     withLockedStore(objectStore, os -> {
@@ -236,6 +243,7 @@ public class ObjectStoreOperations {
    * @return A List with all the keys or an empty one if the object store is empty
    */
   @Throws(AvailabilityErrorTypeProvider.class)
+  @Execution(BLOCKING)
   public List<String> retrieveAllKeys(
                                       @Optional @ParameterDsl(
                                           allowInlineDefinition = false) @Expression(NOT_SUPPORTED) ObjectStore<Serializable> objectStore) {
@@ -249,6 +257,7 @@ public class ObjectStoreOperations {
    * @return All the key value pairs or an empty Map if no values are present
    */
   @Throws(AvailabilityErrorTypeProvider.class)
+  @Execution(BLOCKING)
   public Map<String, Serializable> retrieveAll(
                                                @Optional @ParameterDsl(
                                                    allowInlineDefinition = false) @Expression(NOT_SUPPORTED) ObjectStore<Serializable> objectStore) {
