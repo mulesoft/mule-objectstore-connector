@@ -208,7 +208,7 @@ public class ObjectStoreOperations {
    * on the same object store while this operation is running. If the runtime is running on cluster mode, this synchronization is
    * also guaranteed across nodes.
    *
-   * @param key         the key of the object to be removed
+   * @param key         the key of the object from which to verify its existence
    * @param objectStore A reference to the ObjectStore to be used. If not defined, the runtime's default partition will be used
    */
   @Summary("Returns whether the key is present or not")
