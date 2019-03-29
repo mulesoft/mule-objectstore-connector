@@ -6,12 +6,21 @@
  */
 package org.mule.extension.objectstore.internal;
 
-import org.mule.extension.objectstore.internal.error.*;
+import org.mule.extension.objectstore.internal.error.AvailabilityErrorTypeProvider;
+import org.mule.extension.objectstore.internal.error.ContainsErrorTypeProvider;
+import org.mule.extension.objectstore.internal.error.RemoveErrorTypeProvider;
+import org.mule.extension.objectstore.internal.error.RetrieveErrorTypeProvider;
+import org.mule.extension.objectstore.internal.error.StoreErrorTypeProvider;
 import org.mule.runtime.api.lock.LockFactory;
 import org.mule.runtime.api.meta.NamedObject;
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.api.metadata.TypedValue;
-import org.mule.runtime.api.store.*;
+import org.mule.runtime.api.store.ObjectAlreadyExistsException;
+import org.mule.runtime.api.store.ObjectDoesNotExistException;
+import org.mule.runtime.api.store.ObjectStore;
+import org.mule.runtime.api.store.ObjectStoreException;
+import org.mule.runtime.api.store.ObjectStoreManager;
+import org.mule.runtime.api.store.ObjectStoreNotAvailableException;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.dsl.xml.ParameterDsl;
 import org.mule.runtime.extension.api.annotation.error.Throws;
@@ -30,7 +39,11 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
 import static java.lang.String.format;
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.*;
+import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.INVALID_KEY;
+import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_ALREADY_EXISTS;
+import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_NOT_FOUND;
+import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NULL_VALUE;
+import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
 import static org.mule.runtime.api.meta.model.operation.ExecutionType.BLOCKING;
