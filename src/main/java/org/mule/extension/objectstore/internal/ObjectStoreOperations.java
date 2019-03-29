@@ -6,32 +6,12 @@
  */
 package org.mule.extension.objectstore.internal;
 
-import static java.lang.String.format;
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.INVALID_KEY;
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_ALREADY_EXISTS;
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_NOT_FOUND;
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NULL_VALUE;
-import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
-import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
-import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
-import static org.mule.runtime.api.meta.model.operation.ExecutionType.BLOCKING;
-import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
-import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
-import org.mule.extension.objectstore.internal.error.AvailabilityErrorTypeProvider;
-import org.mule.extension.objectstore.internal.error.ContainsErrorTypeProvider;
-import org.mule.extension.objectstore.internal.error.RemoveErrorTypeProvider;
-import org.mule.extension.objectstore.internal.error.RetrieveErrorTypeProvider;
-import org.mule.extension.objectstore.internal.error.StoreErrorTypeProvider;
+import org.mule.extension.objectstore.internal.error.*;
 import org.mule.runtime.api.lock.LockFactory;
 import org.mule.runtime.api.meta.NamedObject;
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.api.metadata.TypedValue;
-import org.mule.runtime.api.store.ObjectAlreadyExistsException;
-import org.mule.runtime.api.store.ObjectDoesNotExistException;
-import org.mule.runtime.api.store.ObjectStore;
-import org.mule.runtime.api.store.ObjectStoreException;
-import org.mule.runtime.api.store.ObjectStoreManager;
-import org.mule.runtime.api.store.ObjectStoreNotAvailableException;
+import org.mule.runtime.api.store.*;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.dsl.xml.ParameterDsl;
 import org.mule.runtime.extension.api.annotation.error.Throws;
@@ -42,13 +22,20 @@ import org.mule.runtime.extension.api.annotation.param.display.Summary;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import static java.lang.String.format;
+import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.*;
+import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
+import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
+import static org.mule.runtime.api.meta.model.operation.ExecutionType.BLOCKING;
+import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
+import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
 
 /**
  * Operations for the ObjectStore connector
@@ -59,9 +46,6 @@ public class ObjectStoreOperations {
 
   @Inject
   private LockFactory lockFactory;
-
-  @Inject
-  private ObjectStoreRegistry registry;
 
   @Inject
   @Named(OBJECT_STORE_MANAGER)
@@ -108,17 +92,18 @@ public class ObjectStoreOperations {
     validateKey(key);
 
     withLockedKey(objectStore, key, os -> {
-      if (os.contains(key)) {
+      try {
+        os.store(key, value);
+      } catch (ObjectAlreadyExistsException e) {
         if (failIfPresent) {
           throw new ModuleException(KEY_ALREADY_EXISTS, new ObjectAlreadyExistsException(
                                                                                          createStaticMessage("ObjectStore already contains an object for key '"
                                                                                              + key + "'")));
         } else {
           os.remove(key);
+          os.store(key, value);
         }
       }
-
-      os.store(key, value);
       return null;
     });
   }
@@ -149,16 +134,19 @@ public class ObjectStoreOperations {
                                                  allowInlineDefinition = false) @Expression(NOT_SUPPORTED) ObjectStore objectStore) {
 
     validateKey(key);
+
     Object value = withLockedKey(objectStore, key, os -> {
-      if (os.contains(key)) {
+      try {
         return os.retrieve(key);
-      } else if (defaultValue != null && defaultValue.getValue() != null) {
-        return defaultValue;
-      } else {
-        throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
-                                                                                                            "ObjectStore '%s' doesn't contain any value for key '%s' and default value was not provided or "
-                                                                                                                + "resolved to a null value.",
-                                                                                                            os, key))));
+      } catch (ObjectDoesNotExistException e) {
+        if (defaultValue != null && defaultValue.getValue() != null) {
+          return defaultValue;
+        } else {
+          throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
+                                                                                                              "ObjectStore '%s' doesn't contain any value for key '%s' and default value was not provided or "
+                                                                                                                  + "resolved to a null value.",
+                                                                                                              os, key))));
+        }
       }
     });
 
@@ -189,14 +177,15 @@ public class ObjectStoreOperations {
   public void remove(String key,
                      @Optional @ParameterDsl(allowInlineDefinition = false) @Expression(NOT_SUPPORTED) ObjectStore objectStore) {
     validateKey(key);
+
     withLockedKey(objectStore, key, os -> {
-      if (!os.contains(key)) {
+      try {
+        os.remove(key);
+      } catch (ObjectDoesNotExistException e) {
         throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
                                                                                                             "ObjectStore doesn't contain any value for key '%s'",
                                                                                                             key))));
       }
-
-      os.remove(key);
       return null;
     });
   }
@@ -247,7 +236,7 @@ public class ObjectStoreOperations {
   public List<String> retrieveAllKeys(
                                       @Optional @ParameterDsl(
                                           allowInlineDefinition = false) @Expression(NOT_SUPPORTED) ObjectStore<Serializable> objectStore) {
-    return withLockedStore(objectStore, os -> os.allKeys());
+    return withLockedStore(objectStore, ObjectStore::allKeys);
   }
 
   /**

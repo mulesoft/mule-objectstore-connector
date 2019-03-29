@@ -11,10 +11,13 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mule.runtime.api.lock.LockFactory;
+import org.mule.runtime.api.store.ObjectDoesNotExistException;
 import org.mule.runtime.api.store.ObjectStore;
+import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.extension.api.exception.ModuleException;
 
@@ -42,12 +45,13 @@ public class ObjectStoreOperationsTestCase {
   private ObjectStoreOperations objectStoreOperations;
 
   @Test
-  public void retrieveValueWhenObjectStoreAndDefaultValueAreNull() {
+  public void retrieveValueWhenObjectStoreAndDefaultValueAreNull() throws ObjectStoreException {
     when(lockFactory.createLock(anyString())).thenReturn(new ReentrantLock());
 
     ObjectStore objectStore = mock(ObjectStore.class);
     when(objectStore.toString()).thenReturn("objectStoreStringRepresentation");
     when(runtimeObjectStoreManager.getDefaultPartition()).thenReturn(objectStore);
+    when(objectStore.retrieve(Matchers.any())).thenThrow(new ObjectDoesNotExistException());
 
     expectedException.expect(ModuleException.class);
     expectedException.expectMessage(containsString("ObjectStore 'objectStoreStringRepresentation'"));
