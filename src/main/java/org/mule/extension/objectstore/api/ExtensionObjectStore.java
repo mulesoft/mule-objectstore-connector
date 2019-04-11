@@ -156,12 +156,10 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     storeManagerProvider = getObjectStoreManagerProvider();
     objectStoreManager = getObjectStoreManager();
 
-    if (maxEntries != null) {
-      if (maxEntries < 0) {
-        LOGGER
-                .warn(format("The maxEntries parameter should not be negative (given value was: %d), otherwise there is no guarantee that the expiration policy will work correctly. For unlimited entries, just omit passing this parameter",
-                        maxEntries));
-      }
+    if (maxEntries != null && maxEntries < 0) {
+      LOGGER
+          .warn(format("The maxEntries parameter should not be negative (given value was: %d), otherwise there is no guarantee that the expiration policy will work correctly. For unlimited entries, just omit passing this parameter",
+                       maxEntries));
     }
 
     final ObjectStoreSettings.Builder settings = ObjectStoreSettings.builder()
