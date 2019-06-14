@@ -280,7 +280,7 @@ public class ObjectStoreOperations {
     if (value == null || value.getValue() == null) {
       if (failOnNullValue) {
         throw new ModuleException(NULL_VALUE, new IllegalArgumentException(
-                                                                           "A null value was provided. Please provided a non-null value or set the 'failOnNullValue' parameter to 'false'"));
+                                                                           "A null value was provided. Please provide a non-null value or set the 'failOnNullValue' parameter to 'false'"));
       } else {
         return false;
       }
