@@ -156,6 +156,12 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     storeManagerProvider = getObjectStoreManagerProvider();
     objectStoreManager = getObjectStoreManager();
 
+    if (maxEntries != null && maxEntries < 0) {
+      LOGGER
+          .warn(format("The maxEntries parameter should not be negative (given value was: %d), otherwise there is no guarantee that the expiration policy will work correctly. For unlimited entries, just omit passing this parameter",
+                       maxEntries));
+    }
+
     final ObjectStoreSettings.Builder settings = ObjectStoreSettings.builder()
         .persistent(persistent)
         .maxEntries(maxEntries)
@@ -313,7 +319,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     return configurationProvider.getConnectionProvider().orElseGet(FallbackObjectStoreManagerProvider::new);
   }
 
-  //TODO: this can be removed after MULE-15209 is fixed.
+  // TODO: this can be removed after MULE-15209 is fixed.
   private void checkDelegatedStoreInitialized() throws IllegalStateException {
     if (delegateStore == null) {
       throw new IllegalStateException(format("Can't perform operation on '%s'. ObjectStore not initialized.",

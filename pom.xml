@@ -66,13 +66,17 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <targetRuntimes>
-                        <targetRuntime>MULE:4.1.1</targetRuntime>
-                        <targetRuntime>MULE:4.1.2</targetRuntime>
-                        <targetRuntime>MULE:4.1.3</targetRuntime>
-                        <targetRuntime>MULE:4.1.4-SNAPSHOT</targetRuntime>
-                        <targetRuntime>MULE:4.2.0-SNAPSHOT</targetRuntime>
-                    </targetRuntimes>
+                    <argLines>
+                        <argLine>
+                            -javaagent:${settings.localRepository}/org/jacoco/org.jacoco.agent/${jacoco.version}/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=${session.executionRootDirectory}/target/jacoco.exec
+                        </argLine>
+                    </argLines>
+                    <runtimeConfiguration>
+                        <discoverRuntimes>
+                            <product>EE</product>
+                            <includeSnapshots>true</includeSnapshots>
+                        </discoverRuntimes>
+                    </runtimeConfiguration>
                 </configuration>
                 <dependencies>
                     <dependency>
