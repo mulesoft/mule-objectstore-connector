@@ -88,21 +88,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Expression(NOT_SUPPORTED)
   private Integer maxEntries;
 
-  /**
-   * The entry timeout. If absent, then the described {@link ObjectStore} will have no time boundaries.
-   */
-  @Parameter
-  @Optional
-  @Expression(NOT_SUPPORTED)
-  private Long entryTtl;
 
-  /**
-   * A {@link TimeUnit} which qualifies the {@link #entryTtl}
-   */
-  @Parameter
-  @Optional(defaultValue = "SECONDS")
-  @Expression(NOT_SUPPORTED)
-  private TimeUnit entryTtlUnit;
 
   private ComponentLocation location;
 
