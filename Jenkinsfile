@@ -1,5 +1,5 @@
-Map pipelineParams = ["mavenTestGoal"  : "verify -Dannotation.failOnError=false",
-                      "mavenDeployGoal": "deploy -DskipTests -Dannotation.failOnError=false"
-]
+Map pipelineParams = [ "mavenTestGoal"   : "verify -Dannotation.failOnError=false",
+                       "mavenDeployGoal" : "deploy -DskipTests -Dannotation.failOnError=false",
+                       "projectType"     : "Extensions" ]
 
-runtimeExtensionsBuild(pipelineParams)
+runtimeBuild(pipelineParams)
