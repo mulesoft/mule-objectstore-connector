@@ -59,4 +59,9 @@ public class ObjectStoreOperationsTestCase {
     objectStoreOperations.retrieve("key", null, null);
   }
 
+  @Test
+  public void concurrentStoreOperationsDontLeadToExceptionsWhenFailIsPresentIsSetToFalse() {
+
+  }
+
 }
