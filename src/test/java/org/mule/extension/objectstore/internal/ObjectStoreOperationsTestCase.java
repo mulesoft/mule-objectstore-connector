@@ -61,7 +61,7 @@ public class ObjectStoreOperationsTestCase {
 
   @Test
   public void concurrentStoreOperationsDontLeadToExceptionsWhenFailIsPresentIsSetToFalse() {
-
+    assert true;
   }
 
 }
