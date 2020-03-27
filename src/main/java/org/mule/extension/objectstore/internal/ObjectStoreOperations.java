@@ -114,7 +114,11 @@ public class ObjectStoreOperations {
                                                                                              + key + "'")));
         } else {
           os.remove(key);
-          os.store(key, value);
+          try {
+            os.store(key, value);
+          } catch (ObjectAlreadyExistsException ex) {
+            // If the second store throws this exception, we should ignore it because failIfPresent is set to false.
+          }
         }
       }
       return null;
