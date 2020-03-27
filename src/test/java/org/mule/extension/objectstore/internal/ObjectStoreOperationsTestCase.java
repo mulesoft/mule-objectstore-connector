@@ -44,6 +44,8 @@ import static org.mule.runtime.api.metadata.TypedValue.of;
 @RunWith(MockitoJUnitRunner.class)
 public class ObjectStoreOperationsTestCase {
 
+  private static final int NUMBER_OF_CONCURRENT_STORES = 150;
+
   @Rule
   public ExpectedException expectedException = none();
 
@@ -73,18 +75,17 @@ public class ObjectStoreOperationsTestCase {
 
   @Test
   public void concurrentStoreOperationsDontLeadToExceptionsWhenFailIsPresentIsSetToFalse() throws InterruptedException {
-    // Different locks to emulate the behavior on CloudHub cluster
+    // Different locks to emulate the behavior on CloudHub with more than one worker.
     when(lockFactory.createLock(anyString())).thenAnswer(invocationOnMock -> new ReentrantLock());
 
     ObjectStore objectStore = new InMemoryObjectStore();
 
-    int numberOfConcurrentStores = 150;
-    CountDownLatch threadsStartedLatch = new CountDownLatch(numberOfConcurrentStores);
+    CountDownLatch threadsStartedLatch = new CountDownLatch(NUMBER_OF_CONCURRENT_STORES);
     Semaphore startProcessingSemaphore = new Semaphore(0);
     AtomicInteger numberOfExceptions = new AtomicInteger(0);
 
     List<Thread> threadList = new LinkedList<>();
-    for (int i = 0; i < numberOfConcurrentStores; ++i) {
+    for (int i = 0; i < NUMBER_OF_CONCURRENT_STORES; ++i) {
       Thread t = new Thread(() -> {
         try {
           threadsStartedLatch.countDown();
@@ -105,7 +106,7 @@ public class ObjectStoreOperationsTestCase {
     threadsStartedLatch.await();
 
     // Signal the threads to start processing.
-    startProcessingSemaphore.release(numberOfConcurrentStores);
+    startProcessingSemaphore.release(NUMBER_OF_CONCURRENT_STORES);
 
     // Wait for threads completion.
     for (Thread thread : threadList) {
@@ -113,8 +114,6 @@ public class ObjectStoreOperationsTestCase {
     }
 
     assertThat(numberOfExceptions.get(), is(0));
-
-    assert true;
   }
 
 }
