@@ -113,11 +113,13 @@ public class ObjectStoreOperations {
                                                                                          createStaticMessage("ObjectStore already contains an object for key '"
                                                                                              + key + "'")));
         } else {
-          os.remove(key);
           try {
+            os.remove(key);
             os.store(key, value);
-          } catch (ObjectAlreadyExistsException ex) {
-            // If the second store throws this exception, we should ignore it because failIfPresent is set to false.
+          } catch (ObjectAlreadyExistsException | ObjectDoesNotExistException ex) {
+            // If we have a deficient lock, these operations aren't executed atomically, so we could see:
+            //   - An ObjectDoesNotExistException if some thread removed the key before the remove invocation.
+            //   - An ObjectAlreadyExistsException if some thread added the key between remove and store invocations.
           }
         }
       }
