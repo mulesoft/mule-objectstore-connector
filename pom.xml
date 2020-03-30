@@ -27,6 +27,7 @@
         <munit.extensions.maven.plugin.version>1.0.0</munit.extensions.maven.plugin.version>
         <munit.version>2.2.4</munit.version>
         <mavenResourcesVersion>3.0.2</mavenResourcesVersion>
+        <runtimeVersion>4.3.0-SNAPSHOT</runtimeVersion>
     </properties>
 
     <build>
