@@ -14,23 +14,37 @@ import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import org.mule.runtime.api.lock.LockFactory;
+import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.store.ObjectDoesNotExistException;
 import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.extension.api.exception.ModuleException;
+import org.mule.tck.core.util.store.InMemoryObjectStore;
 
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mule.runtime.api.metadata.TypedValue.of;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObjectStoreOperationsTestCase {
+
+  private static final int NUMBER_OF_CONCURRENT_STORES = 150;
 
   @Rule
   public ExpectedException expectedException = none();
@@ -57,6 +71,49 @@ public class ObjectStoreOperationsTestCase {
     expectedException.expectMessage(containsString("ObjectStore 'objectStoreStringRepresentation'"));
 
     objectStoreOperations.retrieve("key", null, null);
+  }
+
+  @Test
+  public void concurrentStoreOperationsDontLeadToExceptionsWhenFailIsPresentIsSetToFalse() throws InterruptedException {
+    // Different locks to emulate the behavior on CloudHub with more than one worker.
+    when(lockFactory.createLock(anyString())).thenAnswer(invocationOnMock -> new ReentrantLock());
+
+    ObjectStore objectStore = new InMemoryObjectStore();
+
+    CountDownLatch threadsStartedLatch = new CountDownLatch(NUMBER_OF_CONCURRENT_STORES);
+    Semaphore startProcessingSemaphore = new Semaphore(0);
+    AtomicInteger numberOfExceptions = new AtomicInteger(0);
+
+    List<Thread> threadList = new LinkedList<>();
+    for (int i = 0; i < NUMBER_OF_CONCURRENT_STORES; ++i) {
+      Thread t = new Thread(() -> {
+        try {
+          threadsStartedLatch.countDown();
+          startProcessingSemaphore.acquire();
+
+          TypedValue<Serializable> value = of("value");
+          objectStoreOperations.store("key", value, false, false, objectStore);
+        } catch (Exception ex) {
+          numberOfExceptions.incrementAndGet();
+        }
+      });
+      t.start();
+
+      threadList.add(t);
+    }
+
+    // Wait for all threads to be ready to process.
+    threadsStartedLatch.await();
+
+    // Signal the threads to start processing.
+    startProcessingSemaphore.release(NUMBER_OF_CONCURRENT_STORES);
+
+    // Wait for threads completion.
+    for (Thread thread : threadList) {
+      thread.join();
+    }
+
+    assertThat(numberOfExceptions.get(), is(0));
   }
 
 }
