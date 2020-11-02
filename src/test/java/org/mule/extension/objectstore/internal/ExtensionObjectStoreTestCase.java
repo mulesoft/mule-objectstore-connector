@@ -29,7 +29,6 @@ import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.tck.core.util.store.InMemoryObjectStore;
 
 import java.io.Serializable;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
@@ -98,9 +97,10 @@ public class ExtensionObjectStoreTestCase {
     Serializable value = privateObjectStore.retrieve(A_KEY);
     assertThat(value, is(equalTo(A_VALUE)));
 
-    verify(registry, times(startExecutions)).register(eq(privateObjectStore.getName()), anyString(), eq(privateObjectStore));
-    verify(registry, times(startExecutions * 2)).get(eq(privateObjectStore.getName()), anyString());
-    verify(registry, times(stopExecutions)).unregister(eq(privateObjectStore.getName()), anyString());
+    verify(registry, times(startExecutions)).register(privateObjectStore.getName(), "application", privateObjectStore);
+    verify(registry, times(startExecutions)).get(privateObjectStore.getName(), "application");
+    verify(registry, times(startExecutions)).get(privateObjectStore.getName(), "domain");
+    verify(registry, times(stopExecutions)).unregister(privateObjectStore.getName(), "application");
   }
 
   @Test
@@ -115,9 +115,10 @@ public class ExtensionObjectStoreTestCase {
     privateObjectStore.stop();
     assertThat(value, is(equalTo(A_VALUE)));
 
-    verify(registry, times(startExecutions)).register(eq(privateObjectStore.getName()), anyString(), eq(privateObjectStore));
-    verify(registry, times(startExecutions * 2)).get(eq(privateObjectStore.getName()), anyString());
-    verify(registry, times(stopExecutions)).unregister(eq(privateObjectStore.getName()), anyString());
+    verify(registry, times(startExecutions)).register(privateObjectStore.getName(), "application", privateObjectStore);
+    verify(registry, times(startExecutions)).get(privateObjectStore.getName(), "application");
+    verify(registry, times(startExecutions)).get(privateObjectStore.getName(), "domain");
+    verify(registry, times(stopExecutions)).unregister(privateObjectStore.getName(), "application");
   }
 
   @Test
