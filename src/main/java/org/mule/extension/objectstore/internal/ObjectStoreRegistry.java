@@ -6,10 +6,12 @@
  */
 package org.mule.extension.objectstore.internal;
 
+import static java.util.Objects.hash;
 import org.mule.runtime.api.store.ObjectStore;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,17 +21,46 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ObjectStoreRegistry {
 
-  private Map<String, ObjectStore<Serializable>> stores = new ConcurrentHashMap<>();
+  private Map<ObjectStoreKey, ObjectStore<Serializable>> stores = new ConcurrentHashMap<>();
 
-  public void register(String name, ObjectStore<Serializable> store) {
-    stores.put(name, store);
+  public void register(String name, String context, ObjectStore<Serializable> store) {
+    stores.put(new ObjectStoreKey(context, name), store);
   }
 
-  public void unregister(String name) {
-    stores.remove(name);
+  public void unregister(String name, String context) {
+    stores.remove(new ObjectStoreKey(context, name));
   }
 
-  public ObjectStore<Serializable> get(String name) {
-    return stores.get(name);
+  public ObjectStore<Serializable> get(String name, String context) {
+    return stores.get(new ObjectStoreKey(context, name));
+  }
+
+  private final static class ObjectStoreKey {
+
+    private final String context;
+    private final String name;
+
+    ObjectStoreKey(String context, String name) {
+      this.context = context;
+      this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      ObjectStoreKey that = (ObjectStoreKey) o;
+      return Objects.equals(context, that.context) &&
+          Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+      return hash(context, name);
+    }
   }
 }

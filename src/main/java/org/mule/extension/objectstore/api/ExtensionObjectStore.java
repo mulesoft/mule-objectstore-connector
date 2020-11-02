@@ -15,6 +15,7 @@ import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation
 import static org.slf4j.LoggerFactory.getLogger;
 import org.mule.extension.objectstore.internal.ObjectStoreConnector;
 import org.mule.extension.objectstore.internal.ObjectStoreRegistry;
+import org.mule.runtime.api.artifact.Registry;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionProvider;
@@ -29,6 +30,7 @@ import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreSettings;
 import org.mule.runtime.api.exception.DefaultMuleException;
+import org.mule.runtime.core.api.config.MuleConfiguration;
 import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.runtime.core.api.exception.NullExceptionHandler;
 import org.mule.runtime.core.api.extension.ExtensionManager;
@@ -66,6 +68,14 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   @Inject
   private ObjectStoreRegistry registry;
+
+  @Inject
+  @Named("app.name")
+  private java.util.Optional<String> appName = java.util.Optional.empty();
+
+  @Inject
+  @Named("domain.name")
+  private java.util.Optional<String> domainName = java.util.Optional.empty();
 
   @Inject
   @Named(OBJECT_STORE_MANAGER)
@@ -172,19 +182,35 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     }
 
     final String storeName = resolveStoreName();
-    if (registry.get(storeName) != null) {
-      throw new IllegalArgumentException(format("An Object Store was already defined with the name '%s'", storeName));
 
+    if (registry.get(storeName, getContextId()) != null) {
+      throwStoreAlreadyExists(storeName);
+    }
+
+    if (registry.get(storeName, getParentContextId()) != null) {
+      throwStoreAlreadyExists(storeName);
     }
 
     delegateStore = objectStoreManager.getOrCreateObjectStore(storeName, settings.build());
-    registry.register(storeName, this);
+    registry.register(storeName, getContextId(), this);
     started = true;
+  }
+
+  private void throwStoreAlreadyExists(String storeName) {
+    throw new IllegalArgumentException(format("An Object Store was already defined with the name '%s'", storeName));
+  }
+
+  private String getContextId() {
+    return appName.orElse(domainName.orElse(null));
+  }
+
+  private String getParentContextId() {
+    return domainName.orElse(null);
   }
 
   @Override
   public void stop() {
-    registry.unregister(resolveStoreName());
+    registry.unregister(resolveStoreName(), getContextId());
 
     if (delegateStore != null) {
       try {

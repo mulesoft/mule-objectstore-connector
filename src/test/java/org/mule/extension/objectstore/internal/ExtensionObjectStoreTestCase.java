@@ -6,12 +6,14 @@
  */
 package org.mule.extension.objectstore.internal;
 
+import static java.util.Optional.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -27,6 +29,7 @@ import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.tck.core.util.store.InMemoryObjectStore;
 
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
@@ -95,9 +98,9 @@ public class ExtensionObjectStoreTestCase {
     Serializable value = privateObjectStore.retrieve(A_KEY);
     assertThat(value, is(equalTo(A_VALUE)));
 
-    verify(registry, times(startExecutions)).register(privateObjectStore.getName(), privateObjectStore);
-    verify(registry, times(startExecutions)).get(privateObjectStore.getName());
-    verify(registry, times(stopExecutions)).unregister(privateObjectStore.getName());
+    verify(registry, times(startExecutions)).register(eq(privateObjectStore.getName()), anyString(), eq(privateObjectStore));
+    verify(registry, times(startExecutions * 2)).get(eq(privateObjectStore.getName()), anyString());
+    verify(registry, times(stopExecutions)).unregister(eq(privateObjectStore.getName()), anyString());
   }
 
   @Test
@@ -112,9 +115,9 @@ public class ExtensionObjectStoreTestCase {
     privateObjectStore.stop();
     assertThat(value, is(equalTo(A_VALUE)));
 
-    verify(registry, times(startExecutions)).register(privateObjectStore.getName(), privateObjectStore);
-    verify(registry, times(startExecutions)).get(privateObjectStore.getName());
-    verify(registry, times(stopExecutions)).unregister(privateObjectStore.getName());
+    verify(registry, times(startExecutions)).register(eq(privateObjectStore.getName()), anyString(), eq(privateObjectStore));
+    verify(registry, times(startExecutions * 2)).get(eq(privateObjectStore.getName()), anyString());
+    verify(registry, times(stopExecutions)).unregister(eq(privateObjectStore.getName()), anyString());
   }
 
   @Test
@@ -136,5 +139,7 @@ public class ExtensionObjectStoreTestCase {
     setFieldValue(objectStore, "entryTtlUnit", TimeUnit.SECONDS, true);
     setFieldValue(objectStore, "expirationInterval", 1000L, true);
     setFieldValue(objectStore, "expirationIntervalUnit", TimeUnit.SECONDS, true);
+    setFieldValue(objectStore, "appName", of("application"), true);
+    setFieldValue(objectStore, "domainName", of("domain"), true);
   }
 }
