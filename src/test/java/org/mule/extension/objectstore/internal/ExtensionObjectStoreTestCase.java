@@ -13,7 +13,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
