@@ -6,6 +6,7 @@
  */
 package org.mule.extension.objectstore.internal;
 
+import static java.util.Optional.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
@@ -95,9 +96,10 @@ public class ExtensionObjectStoreTestCase {
     Serializable value = privateObjectStore.retrieve(A_KEY);
     assertThat(value, is(equalTo(A_VALUE)));
 
-    verify(registry, times(startExecutions)).register(privateObjectStore.getName(), privateObjectStore);
-    verify(registry, times(startExecutions)).get(privateObjectStore.getName());
-    verify(registry, times(stopExecutions)).unregister(privateObjectStore.getName());
+    verify(registry, times(startExecutions)).register(privateObjectStore.getName(), "application", privateObjectStore);
+    verify(registry, times(startExecutions)).get(privateObjectStore.getName(), "application");
+    verify(registry, times(startExecutions)).get(privateObjectStore.getName(), "domain");
+    verify(registry, times(stopExecutions)).unregister(privateObjectStore.getName(), "application");
   }
 
   @Test
@@ -112,9 +114,10 @@ public class ExtensionObjectStoreTestCase {
     privateObjectStore.stop();
     assertThat(value, is(equalTo(A_VALUE)));
 
-    verify(registry, times(startExecutions)).register(privateObjectStore.getName(), privateObjectStore);
-    verify(registry, times(startExecutions)).get(privateObjectStore.getName());
-    verify(registry, times(stopExecutions)).unregister(privateObjectStore.getName());
+    verify(registry, times(startExecutions)).register(privateObjectStore.getName(), "application", privateObjectStore);
+    verify(registry, times(startExecutions)).get(privateObjectStore.getName(), "application");
+    verify(registry, times(startExecutions)).get(privateObjectStore.getName(), "domain");
+    verify(registry, times(stopExecutions)).unregister(privateObjectStore.getName(), "application");
   }
 
   @Test
@@ -136,5 +139,7 @@ public class ExtensionObjectStoreTestCase {
     setFieldValue(objectStore, "entryTtlUnit", TimeUnit.SECONDS, true);
     setFieldValue(objectStore, "expirationInterval", 1000L, true);
     setFieldValue(objectStore, "expirationIntervalUnit", TimeUnit.SECONDS, true);
+    setFieldValue(objectStore, "appName", of("application"), true);
+    setFieldValue(objectStore, "domainName", of("domain"), true);
   }
 }
