@@ -9,6 +9,7 @@ package org.mule.extension.objectstore.internal.error;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
 import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
+import org.mule.runtime.extension.api.error.MuleErrors;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,6 +28,7 @@ public class AvailabilityErrorTypeProvider implements ErrorTypeProvider {
   public Set<ErrorTypeDefinition> getErrorTypes() {
     Set<ErrorTypeDefinition> errors = new HashSet<>();
     errors.add(STORE_NOT_AVAILABLE);
+    errors.add(MuleErrors.ANY);
 
     return errors;
   }

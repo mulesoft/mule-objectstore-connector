@@ -10,11 +10,13 @@ import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.IN
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KEY_ALREADY_EXISTS;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.NULL_VALUE;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
-import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
-import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
+import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
+import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
 
 /**
  * Errors for the store operation
@@ -34,6 +36,7 @@ public class StoreErrorTypeProvider implements ErrorTypeProvider {
     errors.add(NULL_VALUE);
     errors.add(KEY_ALREADY_EXISTS);
     errors.add(STORE_NOT_AVAILABLE);
+    errors.add(ANY);
 
     return errors;
   }

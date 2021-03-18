@@ -11,6 +11,7 @@ import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.KE
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
 import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
+import org.mule.runtime.extension.api.error.MuleErrors;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,6 +33,7 @@ public class RetrieveErrorTypeProvider implements ErrorTypeProvider {
     errors.add(INVALID_KEY);
     errors.add(KEY_NOT_FOUND);
     errors.add(STORE_NOT_AVAILABLE);
+    errors.add(MuleErrors.ANY);
 
     return errors;
   }

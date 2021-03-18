@@ -8,11 +8,13 @@ package org.mule.extension.objectstore.internal.error;
 
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.INVALID_KEY;
 import static org.mule.extension.objectstore.internal.error.ObjectStoreErrors.STORE_NOT_AVAILABLE;
-import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
-import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import org.mule.runtime.extension.api.annotation.error.ErrorTypeProvider;
+import org.mule.runtime.extension.api.error.ErrorTypeDefinition;
+import org.mule.runtime.extension.api.error.MuleErrors;
 
 /**
  * Errors for the contains operation
@@ -30,6 +32,7 @@ public class ContainsErrorTypeProvider implements ErrorTypeProvider {
 
     errors.add(INVALID_KEY);
     errors.add(STORE_NOT_AVAILABLE);
+    errors.add(MuleErrors.ANY);
 
     return errors;
   }
