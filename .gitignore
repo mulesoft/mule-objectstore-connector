@@ -28,3 +28,4 @@ testdir/
 hostkey.ser
 *.h2.db
 *.factorypath
+bin/
