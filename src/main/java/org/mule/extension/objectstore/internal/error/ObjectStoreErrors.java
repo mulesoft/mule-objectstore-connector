@@ -39,5 +39,7 @@ public enum ObjectStoreErrors implements ErrorTypeDefinition<ObjectStoreErrors> 
   /**
    * The operation refers to an {@link ObjectStore} which cannot be accessed at this time
    */
-  STORE_NOT_AVAILABLE
+  STORE_NOT_AVAILABLE,
+
+  ANY
 }
