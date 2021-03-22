@@ -64,6 +64,8 @@ public class ObjectStoreOperations {
   @Named(OBJECT_STORE_MANAGER)
   private ObjectStoreManager runtimeObjectStoreManager;
 
+  private final String RATE_LIMIT_EXCEEDED_PATTERN = "status code was 429";
+
   /**
    * Stores the given {@code value} using the given {@code key}.
    * <p>
@@ -116,6 +118,11 @@ public class ObjectStoreOperations {
           os.remove(key);
           os.store(key, value);
         }
+      } catch (ObjectStoreException e) {
+        if (e.getMessage().contains(RATE_LIMIT_EXCEEDED_PATTERN)) {
+          throw new ModuleException(STORE_NOT_AVAILABLE, new ObjectStoreException(createStaticMessage("Rate Limit exceeded"), e));
+        }
+        throw e;
       }
       return null;
     });
@@ -160,6 +167,11 @@ public class ObjectStoreOperations {
                                                                                                                   + "resolved to a null value.",
                                                                                                               os, key))));
         }
+      } catch (ObjectStoreException e) {
+        if (e.getMessage().contains(RATE_LIMIT_EXCEEDED_PATTERN)) {
+          throw new ModuleException(STORE_NOT_AVAILABLE, new ObjectStoreException(createStaticMessage("Rate Limit exceeded"), e));
+        }
+        throw e;
       }
     });
 
@@ -198,6 +210,11 @@ public class ObjectStoreOperations {
         throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
                                                                                                             "ObjectStore doesn't contain any value for key '%s'",
                                                                                                             key))));
+      } catch (ObjectStoreException e) {
+        if (e.getMessage().contains(RATE_LIMIT_EXCEEDED_PATTERN)) {
+          throw new ModuleException(STORE_NOT_AVAILABLE, new ObjectStoreException(createStaticMessage("Rate Limit exceeded"), e));
+        }
+        throw e;
       }
       return null;
     });
@@ -233,7 +250,14 @@ public class ObjectStoreOperations {
   public void clear(@Optional @ParameterDsl(
       allowInlineDefinition = false) @Expression(NOT_SUPPORTED) ObjectStore<Serializable> objectStore) {
     withLockedStore(objectStore, os -> {
-      os.clear();
+      try {
+        os.clear();
+      } catch (ObjectStoreException e) {
+        if (e.getMessage().contains(RATE_LIMIT_EXCEEDED_PATTERN)) {
+          throw new ModuleException(STORE_NOT_AVAILABLE, new ObjectStoreException(createStaticMessage("Rate Limit exceeded"), e));
+        }
+        throw e;
+      }
       return null;
     });
   }
@@ -311,6 +335,9 @@ public class ObjectStoreOperations {
       throw new ModuleException(createStaticMessage(format("Key '%s' does not exists on object store", key)),
                                 KEY_NOT_FOUND, e);
     } catch (ObjectStoreException e) {
+      if (e.getMessage().contains(RATE_LIMIT_EXCEEDED_PATTERN)) {
+        throw new ModuleException(STORE_NOT_AVAILABLE, new ObjectStoreException(createStaticMessage("Rate Limit exceeded"), e));
+      }
       throw new ModuleException(createStaticMessage("Found error trying to access ObjectStore"), ANY, e);
     } finally {
       lock.unlock();
@@ -326,11 +353,16 @@ public class ObjectStoreOperations {
     } catch (ObjectStoreNotAvailableException e) {
       throw new ModuleException(createStaticMessage("ObjectStore '%s' is not available at the moment"), STORE_NOT_AVAILABLE, e);
     } catch (ObjectStoreException e) {
+      if (e.getMessage().contains(RATE_LIMIT_EXCEEDED_PATTERN)) {
+        throw new ModuleException(STORE_NOT_AVAILABLE, new ObjectStoreException(createStaticMessage("Rate Limit exceeded"), e));
+      }
       throw new ModuleException(createStaticMessage("Found error trying to access ObjectStore"), ANY, e);
     } finally {
       lock.unlock();
     }
   }
+
+
 
   private Lock getKeyLock(String key, ObjectStore<Serializable> objectStore) {
 
