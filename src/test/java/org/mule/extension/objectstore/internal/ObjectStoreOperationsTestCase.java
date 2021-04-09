@@ -17,6 +17,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mule.runtime.api.i18n.I18nMessage;
 import org.mule.runtime.api.lock.LockFactory;
 import org.mule.runtime.api.metadata.TypedValue;
+import org.mule.runtime.api.store.ObjectAlreadyExistsException;
 import org.mule.runtime.api.store.ObjectDoesNotExistException;
 import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
@@ -84,4 +85,20 @@ public class ObjectStoreOperationsTestCase {
 
   }
 
+  @Test
+  public void removeWhenStoringException() throws ObjectStoreException {
+    when(lockFactory.createLock(anyString())).thenReturn(new ReentrantLock());
+
+    ObjectStore objectStore = mock(ObjectStore.class);
+    when(objectStore.toString()).thenReturn("objectStoreStringRepresentation");
+    when(runtimeObjectStoreManager.getDefaultPartition()).thenReturn(objectStore);
+    Exception exceptionAlreadyExists = new Exception("ObjectStore already contains entry for key 123");
+    doThrow(new ObjectAlreadyExistsException(exceptionAlreadyExists)).when(objectStore).store(Matchers.any(), Matchers.any());
+    Exception exceptionDoesNotExists = new Exception("ObjectStore doesn't contain any value for key '123'");
+    doThrow(new ObjectDoesNotExistException(exceptionDoesNotExists)).when(objectStore).remove(Matchers.any());
+
+    expectedException.expect(ModuleException.class);
+    expectedException.expectMessage(containsString("ObjectStore doesn't contain any value for key '123'"));
+    objectStoreOperations.store("123", TypedValue.of("value"), false, false, null);
+  }
 }
