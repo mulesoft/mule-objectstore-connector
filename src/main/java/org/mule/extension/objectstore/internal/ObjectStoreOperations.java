@@ -291,8 +291,8 @@ public class ObjectStoreOperations {
       return os.remove(key);
     } catch (ObjectDoesNotExistException e) {
       throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
-              "ObjectStore doesn't contain any value for key '%s'",
-              key))));
+                                                                                                          "ObjectStore doesn't contain any value for key '%s'",
+                                                                                                          key))));
     } catch (ObjectStoreException e) {
       if (e.getMessage().contains(RATE_LIMIT_EXCEEDED_PATTERN)) {
         throw new ModuleException(STORE_NOT_AVAILABLE, new ObjectStoreException(createStaticMessage("Rate Limit exceeded"), e));
