@@ -115,7 +115,7 @@ public class ObjectStoreOperations {
                                                                                          createStaticMessage("ObjectStore already contains an object for key '"
                                                                                              + key + "'")));
         } else {
-          os.remove(key);
+          removeTask(os, key);
           os.store(key, value);
         }
       } catch (ObjectStoreException e) {
@@ -203,21 +203,7 @@ public class ObjectStoreOperations {
                      @Optional @ParameterDsl(allowInlineDefinition = false) @Expression(NOT_SUPPORTED) ObjectStore objectStore) {
     validateKey(key);
 
-    withLockedKey(objectStore, key, os -> {
-      try {
-        os.remove(key);
-      } catch (ObjectDoesNotExistException e) {
-        throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
-                                                                                                            "ObjectStore doesn't contain any value for key '%s'",
-                                                                                                            key))));
-      } catch (ObjectStoreException e) {
-        if (e.getMessage().contains(RATE_LIMIT_EXCEEDED_PATTERN)) {
-          throw new ModuleException(STORE_NOT_AVAILABLE, new ObjectStoreException(createStaticMessage("Rate Limit exceeded"), e));
-        }
-        throw e;
-      }
-      return null;
-    });
+    withLockedKey(objectStore, key, os -> removeTask(os, key));
   }
 
   /**
@@ -298,6 +284,21 @@ public class ObjectStoreOperations {
 
       return all;
     });
+  }
+
+  private Serializable removeTask(ObjectStore<Serializable> os, String key) throws ObjectStoreException {
+    try {
+      return os.remove(key);
+    } catch (ObjectDoesNotExistException e) {
+      throw new ModuleException(KEY_NOT_FOUND, new ObjectDoesNotExistException(createStaticMessage(format(
+                                                                                                          "ObjectStore doesn't contain any value for key '%s'",
+                                                                                                          key))));
+    } catch (ObjectStoreException e) {
+      if (e.getMessage().contains(RATE_LIMIT_EXCEEDED_PATTERN)) {
+        throw new ModuleException(STORE_NOT_AVAILABLE, new ObjectStoreException(createStaticMessage("Rate Limit exceeded"), e));
+      }
+      throw e;
+    }
   }
 
   private boolean validateValue(TypedValue<Serializable> value, boolean failOnNullValue) {

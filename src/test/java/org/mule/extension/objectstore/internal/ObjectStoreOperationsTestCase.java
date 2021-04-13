@@ -11,26 +11,23 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mule.runtime.api.i18n.I18nMessage;
 import org.mule.runtime.api.lock.LockFactory;
 import org.mule.runtime.api.metadata.TypedValue;
+import org.mule.runtime.api.store.ObjectAlreadyExistsException;
 import org.mule.runtime.api.store.ObjectDoesNotExistException;
 import org.mule.runtime.api.store.ObjectStore;
 import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.extension.api.exception.ModuleException;
 
-import java.io.Serializable;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -57,7 +54,7 @@ public class ObjectStoreOperationsTestCase {
     ObjectStore objectStore = mock(ObjectStore.class);
     when(objectStore.toString()).thenReturn("objectStoreStringRepresentation");
     when(runtimeObjectStoreManager.getDefaultPartition()).thenReturn(objectStore);
-    when(objectStore.retrieve(Matchers.any())).thenThrow(new ObjectDoesNotExistException());
+    when(objectStore.retrieve(any())).thenThrow(new ObjectDoesNotExistException());
 
     expectedException.expect(ModuleException.class);
     expectedException.expectMessage(containsString("ObjectStore 'objectStoreStringRepresentation'"));
@@ -76,7 +73,7 @@ public class ObjectStoreOperationsTestCase {
     when(runtimeObjectStoreManager.getDefaultPartition()).thenReturn(objectStore);
     Exception e =
         new Exception("Unable to check existence of object with key test in store APP_osdemo__defaultPersistentObjectStore, status code was 429, response was null");
-    when(objectStore.retrieve(Matchers.any())).thenThrow(new ObjectStoreException(e));
+    when(objectStore.retrieve(any())).thenThrow(new ObjectStoreException(e));
 
     expectedException.expect(ModuleException.class);
     expectedException.expectMessage(containsString("Rate Limit"));
@@ -84,4 +81,20 @@ public class ObjectStoreOperationsTestCase {
 
   }
 
+  @Test
+  public void removeWhenStoringException() throws ObjectStoreException {
+    when(lockFactory.createLock(anyString())).thenReturn(new ReentrantLock());
+
+    ObjectStore objectStore = mock(ObjectStore.class);
+    when(objectStore.toString()).thenReturn("objectStoreStringRepresentation");
+    when(runtimeObjectStoreManager.getDefaultPartition()).thenReturn(objectStore);
+    Exception exceptionAlreadyExists = new Exception("ObjectStore already contains entry for key 123");
+    doThrow(new ObjectAlreadyExistsException(exceptionAlreadyExists)).when(objectStore).store(any(), any());
+    Exception exceptionDoesNotExists = new Exception("ObjectStore doesn't contain any value for key '123'");
+    doThrow(new ObjectDoesNotExistException(exceptionDoesNotExists)).when(objectStore).remove(any());
+
+    expectedException.expect(ModuleException.class);
+    expectedException.expectMessage(containsString("ObjectStore doesn't contain any value for key '123'"));
+    objectStoreOperations.store("123", TypedValue.of("value"), false, false, null);
+  }
 }
