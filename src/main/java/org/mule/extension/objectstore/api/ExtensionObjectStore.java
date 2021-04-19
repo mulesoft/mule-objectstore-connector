@@ -398,8 +398,4 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   public TimeUnit getExpirationIntervalUnit() {
     return expirationIntervalUnit;
   }
-
-  protected ObjectStoreConnector getConfig() {
-    return config;
-  }
 }
