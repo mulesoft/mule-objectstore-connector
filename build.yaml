@@ -1,1 +1,2 @@
+mavenAdditionalArgs: -Dannotation.failOnError=false
 projectType: extension
