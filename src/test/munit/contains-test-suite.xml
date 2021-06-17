@@ -40,8 +40,11 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 		</munit:validation>
 	</munit:test>
 	<munit:test name="containsWithInvalidKey" doc:id="b7f68ed1-b396-4596-8cbf-6e49f35c2afd" expectedErrorType="OS:INVALID_KEY">
+		<munit:behavior >
+			<set-variable value="" variableName="emptyKey"/>
+		</munit:behavior>
 		<munit:execution >
-			<os:contains doc:name="Contains" doc:id="332ad0a7-f5c9-4750-882a-4f89b6c7b600" key="#[vars.nullKey]"/>
+			<os:contains doc:name="Contains" doc:id="332ad0a7-f5c9-4750-882a-4f89b6c7b600" key="#[vars.emptyKey]"/>
 		</munit:execution>
 	</munit:test>
 
