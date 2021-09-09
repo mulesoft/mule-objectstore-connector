@@ -181,6 +181,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
       settings.entryTtl(entryTtlUnit.toMillis(entryTtl));
     }
 
+    LOGGER.info("Configuracion de ObjectStore:\n" + settings.toString());
+
     final String storeName = resolveStoreName();
 
     if (registry.get(storeName, getContextId()) != null) {
@@ -192,6 +194,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     }
 
     delegateStore = objectStoreManager.getOrCreateObjectStore(storeName, settings.build());
+    LOGGER.info("StoreName: " + storeName + "\nContext: " + getContextId());
+
     registry.register(storeName, getContextId(), this);
     started = true;
   }
@@ -325,6 +329,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   private ConnectionProvider<ObjectStoreManager> getObjectStoreManagerProvider() throws MuleException {
     if (config == null) {
+      LOGGER.info("Valor de configuracion:\n" + config.toString());
       return new FallbackObjectStoreManagerProvider();
     }
 
@@ -335,7 +340,9 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
     ConfigurationInstance configurationProvider;
     try {
+      LOGGER.info("ConfigName:" + getConfigName());
       configurationProvider = extensionManager.getConfiguration(getConfigName(), event);
+      LOGGER.info("ConfigProvider en getObjectStoreManagerProvider:\n" + configurationProvider);
     } catch (IllegalArgumentException e) {
       throw new DefaultMuleException(format("ObjectStore '%s' points to configuration '%s' which doesn't exits",
                                             resolveStoreName(), getConfigName()),

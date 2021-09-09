@@ -30,6 +30,7 @@ import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.extension.api.runtime.operation.Result;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -49,6 +50,7 @@ import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
 import static org.mule.runtime.api.meta.model.operation.ExecutionType.BLOCKING;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Operations for the ObjectStore connector
@@ -56,6 +58,8 @@ import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
  * @since 1.0
  */
 public class ObjectStoreOperations {
+
+  private static final Logger LOGGER = getLogger(ObjectStoreOperations.class);
 
   @Inject
   private LockFactory lockFactory;
@@ -381,6 +385,7 @@ public class ObjectStoreOperations {
   }
 
   private ObjectStore<Serializable> nullSafe(ObjectStore<Serializable> objectStore) {
+    LOGGER.info("ObjectStore nulo?: " + objectStore.equals(null));
     return objectStore != null ? objectStore : runtimeObjectStoreManager.getDefaultPartition();
   }
 
