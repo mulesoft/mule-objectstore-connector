@@ -69,4 +69,9 @@ public class PrivateObjectStore extends ExtensionObjectStore {
 
     return uuid;
   }
+
+  @Override
+  protected boolean shouldAlwaysExpire() {
+    return true;
+  }
 }

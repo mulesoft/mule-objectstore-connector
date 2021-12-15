@@ -21,6 +21,7 @@ import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionProvider;
 import org.mule.runtime.api.connection.ConnectionValidationResult;
 import org.mule.runtime.api.exception.MuleException;
+import org.mule.runtime.api.lifecycle.LifecycleException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.lifecycle.Stoppable;
 import org.mule.runtime.api.message.Message;
@@ -44,6 +45,7 @@ import org.mule.runtime.extension.api.annotation.param.reference.ConfigReference
 import org.mule.runtime.extension.api.runtime.config.ConfigurationInstance;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -176,6 +178,15 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
         .persistent(persistent)
         .maxEntries(maxEntries)
         .expirationInterval(expirationIntervalUnit.toMillis(expirationInterval));
+
+    try {
+      ObjectStoreSettings.Builder.class.getDeclaredMethod("alwaysExpire", boolean.class).invoke(settings, shouldAlwaysExpire());
+    } catch (NoSuchMethodException e) {
+      LOGGER.warn("`alwaysExpire` method not found in object store settings builder. Expiration for clusterized " +
+          "applications may not work properly. Check the version of the Mule Runtime.");
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new LifecycleException(e, this);
+    }
 
     if (entryTtl != null) {
       settings.entryTtl(entryTtlUnit.toMillis(entryTtl));
@@ -397,5 +408,9 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   public TimeUnit getExpirationIntervalUnit() {
     return expirationIntervalUnit;
+  }
+
+  protected boolean shouldAlwaysExpire() {
+    return false;
   }
 }
