@@ -81,7 +81,7 @@
                 <configuration>
                     <argLines>
                         <argLine>
-                            -javaagent:${settings.localRepository}/org/jacoco/org.jacoco.agent/${jacoco.version}/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=${session.executionRootDirectory}/target/jacoco.exec -XX:+ShowCodeDetailsInExceptionMessages
+                            -javaagent:${settings.localRepository}/org/jacoco/org.jacoco.agent/${jacoco.version}/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=${session.executionRootDirectory}/target/jacoco.exec
                         </argLine>
                     </argLines>
                     <runtimeConfiguration>
@@ -90,9 +90,6 @@
                             <includeSnapshots>true</includeSnapshots>
                         </discoverRuntimes>
                     </runtimeConfiguration>
-                    <environmentVariables>
-                        <_JAVA_OPTIONS>-XX:+PrintCommandLineFlags ${mtf.javaopts}</_JAVA_OPTIONS>
-                    </environmentVariables>
                 </configuration>
                 <dependencies>
                     <dependency>
