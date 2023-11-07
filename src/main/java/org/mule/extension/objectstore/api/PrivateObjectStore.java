@@ -51,6 +51,10 @@ public class PrivateObjectStore extends ExtensionObjectStore {
     return alias;
   }
 
+  public void setAlias(String alias) {
+    this.alias = alias;
+  }
+
   @Override
   protected String resolveStoreName() {
     return storeName.get();
