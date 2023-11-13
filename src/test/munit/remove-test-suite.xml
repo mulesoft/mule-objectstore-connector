@@ -8,7 +8,7 @@
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
 		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
-	<munit:config name="remove-test-suite.xml" minMuleVersion="4.3.0"/>
+	<munit:config name="remove-test-suite.xml" />
 	<munit:before-test name="beforeRemoveTest" doc:id="e510a323-ccdb-4bdd-be3b-f427f6c15297" >
 		<set-variable value="MyKeyName" doc:name="Set Variable" doc:id="5e7f8975-8c5a-4b84-a7b5-d56dff9bd8e4" variableName="myKey"/>
 		<os:store doc:name="Store" doc:id="cc313f53-bb1b-4ad3-9c04-14dd7d19edfa" key="#[vars.myKey]">
