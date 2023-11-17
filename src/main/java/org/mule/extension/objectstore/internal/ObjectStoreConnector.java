@@ -17,6 +17,8 @@ import org.mule.runtime.extension.api.annotation.connectivity.ConnectionProvider
 import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
 import org.mule.runtime.extension.api.annotation.error.ErrorTypes;
 import org.mule.runtime.extension.api.annotation.param.RefName;
+import org.mule.sdk.api.annotation.JavaVersionSupport;
+import org.mule.sdk.api.meta.JavaVersion;
 
 /**
  * Connector that provides functionality to access and create {@link ObjectStore} instances.
@@ -29,6 +31,7 @@ import org.mule.runtime.extension.api.annotation.param.RefName;
 @ErrorTypes(ObjectStoreErrors.class)
 @SubTypeMapping(baseType = ObjectStore.class, subTypes = {TopLevelObjectStore.class, PrivateObjectStore.class})
 @Xml(prefix = "os")
+@JavaVersionSupport({JavaVersion.JAVA_8, JavaVersion.JAVA_11, JavaVersion.JAVA_17})
 public class ObjectStoreConnector {
 
   @RefName
