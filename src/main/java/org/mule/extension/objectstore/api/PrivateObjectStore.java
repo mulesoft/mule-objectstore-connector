@@ -47,8 +47,14 @@ public class PrivateObjectStore extends ExtensionObjectStore {
 
   private LazyValue<String> storeName = new LazyValue<>(this::generateStoreName);
 
+  public PrivateObjectStore() {}
+
   public String getAlias() {
     return alias;
+  }
+
+  public void setAlias(String alias) {
+    this.alias = alias;
   }
 
   @Override

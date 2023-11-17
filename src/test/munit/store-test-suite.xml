@@ -8,7 +8,7 @@
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
 		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
-	<munit:config name="store-test-suite.xml" />
+	<munit:config name="store-test-suite.xml" minMuleVersion="4.3.0"/>
 	
 	
 	<munit:before-test name="beforeStoreTest" doc:id="30af555e-9965-497c-b7d8-f5920454281f" >

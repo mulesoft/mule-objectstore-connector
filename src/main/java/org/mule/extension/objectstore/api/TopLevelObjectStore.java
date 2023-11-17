@@ -27,9 +27,19 @@ public class TopLevelObjectStore extends ExtensionObjectStore {
   @RefName
   private String name;
 
+  public TopLevelObjectStore() {}
+
   @Override
   protected String resolveStoreName() {
     return name;
   }
 
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
 }
