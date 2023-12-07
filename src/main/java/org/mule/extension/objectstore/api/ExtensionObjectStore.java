@@ -156,6 +156,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   protected abstract String resolveStoreName();
 
+  public ExtensionObjectStore() {}
+
   @Override
   public void start() throws MuleException {
     if (started) {
