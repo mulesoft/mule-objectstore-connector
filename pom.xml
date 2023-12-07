@@ -133,7 +133,6 @@
                             <includeSnapshots>true</includeSnapshots>
                         </discoverRuntimes>
                     </runtimeConfiguration>
-
                 </configuration>
                 <dependencies>
                     <dependency>
