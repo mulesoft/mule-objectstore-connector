@@ -1,3 +1,9 @@
 mavenAdditionalArgs: -Dannotation.failOnError=false
 projectType: extension
+additionalTestConfigs:
+  jdk11:
+    testJdkTool: OPEN-JDK11
+  jdk17:
+    testJdkTool: OPEN-JDK17
+    mavenAdditionalArgs: -DdiscoverRuntimes.minMuleVersion=4.6.0
 mavenTool: "3.9.5"
