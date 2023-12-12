@@ -13,7 +13,7 @@
     <groupId>org.mule.connectors</groupId>
     <artifactId>mule-objectstore-connector</artifactId>
     <packaging>mule-extension</packaging>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 
     <name>ObjectStore Connector</name>
     <description>A Mule connector that provides functionality to access, create and manage Object stores</description>
@@ -24,13 +24,69 @@
         <!-- Remove when a new parent version with MTF is available -->
         <munit.input.directory>src/test/munit</munit.input.directory>
         <munit.output.directory>${basedir}/target/test-mule/munit</munit.output.directory>
-        <munit.extensions.maven.plugin.version>1.1.1</munit.extensions.maven.plugin.version>
-        <munit.version>2.3.6</munit.version>
-        <mavenResourcesVersion>3.2.0</mavenResourcesVersion>
+        <munit.extensions.maven.plugin.version>1.2.0-rc2</munit.extensions.maven.plugin.version>
+        <munit.version>3.1.0-rc3</munit.version>
+        <jacoco.version>0.8.10</jacoco.version>
+        <mavenResourcesVersion>3.3.0</mavenResourcesVersion>
+
+        <mulesoftLicenseVersion>1.4.0</mulesoftLicenseVersion>
+        <license.maven.plugin.version>4.2</license.maven.plugin.version>
+        <licensePath>LICENSE_HEADER_CPAL.txt</licensePath>
+        <licenseYear>2023</licenseYear>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.sdk</groupId>
+            <artifactId>mule-sdk-api</artifactId>
+            <version>0.7.0</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>${license.maven.plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.mulesoft.license</groupId>
+                        <artifactId>license</artifactId>
+                        <version>${mulesoftLicenseVersion}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <header>${licensePath}</header>
+                    <properties>
+                        <year>${licenseYear}</year>
+                    </properties>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>${mavenResourcesVersion}</version>
@@ -68,13 +124,14 @@
                 <configuration>
                     <argLines>
                         <argLine>
-                            -javaagent:${settings.localRepository}/org/jacoco/org.jacoco.agent/${jacoco.version}/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=${session.executionRootDirectory}/target/jacoco.exec
+                            -javaagent:${settings.localRepository}/org/jacoco/org.jacoco.agent/${jacoco.version}/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=${session.executionRootDirectory}/target/jacoco-munit.exec
                         </argLine>
                     </argLines>
                     <runtimeConfiguration>
                         <discoverRuntimes>
+                            <minMuleVersion>${minVersion}</minMuleVersion>
+                            <includeSnapshots>false</includeSnapshots>
                             <product>EE</product>
-                            <includeSnapshots>true</includeSnapshots>
                         </discoverRuntimes>
                     </runtimeConfiguration>
                 </configuration>
