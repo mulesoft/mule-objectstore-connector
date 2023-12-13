@@ -1,5 +1,5 @@
 /*
- * Copyright (c) MuleSoft, Inc.  All rights reserved.  http://www.mulesoft.com
+ * Copyright 2023 Salesforce, Inc. All rights reserved.
  * The software in this package is published under the terms of the CPAL v1.0
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
@@ -15,7 +15,6 @@ import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation
 import static org.slf4j.LoggerFactory.getLogger;
 import org.mule.extension.objectstore.internal.ObjectStoreConnector;
 import org.mule.extension.objectstore.internal.ObjectStoreRegistry;
-import org.mule.runtime.api.artifact.Registry;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionProvider;
@@ -30,7 +29,6 @@ import org.mule.runtime.api.store.ObjectStoreException;
 import org.mule.runtime.api.store.ObjectStoreManager;
 import org.mule.runtime.api.store.ObjectStoreSettings;
 import org.mule.runtime.api.exception.DefaultMuleException;
-import org.mule.runtime.core.api.config.MuleConfiguration;
 import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.runtime.core.api.exception.NullExceptionHandler;
 import org.mule.runtime.core.api.extension.ExtensionManager;
@@ -157,6 +155,8 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   private transient ObjectStore<Serializable> delegateStore;
 
   protected abstract String resolveStoreName();
+
+  public ExtensionObjectStore() {}
 
   @Override
   public void start() throws MuleException {
@@ -397,5 +397,41 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   public TimeUnit getExpirationIntervalUnit() {
     return expirationIntervalUnit;
+  }
+
+  public void setPersistent(boolean persistent) {
+    this.persistent = persistent;
+  }
+
+  public void setMaxEntries(Integer maxEntries) {
+    this.maxEntries = maxEntries;
+  }
+
+  public void setEntryTtl(Long entryTtl) {
+    this.entryTtl = entryTtl;
+  }
+
+  public void setEntryTtlUnit(TimeUnit entryTtlUnit) {
+    this.entryTtlUnit = entryTtlUnit;
+  }
+
+  public void setLocation(ComponentLocation location) {
+    this.location = location;
+  }
+
+  public void setExpirationInterval(Long expirationInterval) {
+    this.expirationInterval = expirationInterval;
+  }
+
+  public void setExpirationIntervalUnit(TimeUnit expirationIntervalUnit) {
+    this.expirationIntervalUnit = expirationIntervalUnit;
+  }
+
+  public ObjectStoreConnector getConfig() {
+    return config;
+  }
+
+  public void setConfig(ObjectStoreConnector config) {
+    this.config = config;
   }
 }
