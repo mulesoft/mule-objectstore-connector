@@ -64,6 +64,23 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   private static final Logger LOGGER = getLogger(ExtensionObjectStore.class);
   private boolean started = false;
   private Map<String, ObjectStoreEntryListener> listenerMap = new ConcurrentHashMap<>();
+  ObjectStoreEntryListener listener = new ObjectStoreEntryListener() {
+
+    @Override
+    public void entryAdded(Object key, Object value) {
+      listenerMap.put((String) key, (ObjectStoreEntryListener) value);
+    }
+
+    @Override
+    public void entryRemoved(Object key) {
+      listenerMap.remove((String) key);
+    }
+
+    @Override
+    public void entryUpdated(Object key, Object value) {
+      listenerMap.put((String) key, (ObjectStoreEntryListener) value);
+    }
+  };
 
 
   @Inject
@@ -251,6 +268,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   public void store(String key, Serializable value) throws ObjectStoreException {
     checkDelegatedStoreInitialized();
     delegateStore.store(key, value);
+    listener.entryAdded(key, value);
   }
 
   @Override
@@ -262,6 +280,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Override
   public Serializable remove(String key) throws ObjectStoreException {
     checkDelegatedStoreInitialized();
+    listener.entryRemoved(key);
     return delegateStore.remove(key);
   }
 
