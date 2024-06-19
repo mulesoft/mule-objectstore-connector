@@ -22,6 +22,7 @@ import org.mule.runtime.api.connection.ConnectionValidationResult;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.lifecycle.Stoppable;
+import org.mule.runtime.api.map.ObjectStoreEntryListener;
 import org.mule.runtime.api.message.Message;
 import org.mule.runtime.api.meta.NamedObject;
 import org.mule.runtime.api.store.ObjectStore;
@@ -44,6 +45,8 @@ import org.mule.runtime.extension.api.runtime.config.ConfigurationInstance;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -60,6 +63,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   private static final Logger LOGGER = getLogger(ExtensionObjectStore.class);
   private boolean started = false;
+  private Map<String, ObjectStoreEntryListener> listenerMap = new ConcurrentHashMap<>();
 
   @Inject
   private ExtensionManager extensionManager;
@@ -246,6 +250,13 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   public void store(String key, Serializable value) throws ObjectStoreException {
     checkDelegatedStoreInitialized();
     delegateStore.store(key, value);
+    entryAdded(key, value);
+  }
+
+  private void entryAdded(String key, Serializable value) {
+    for (ObjectStoreEntryListener listener : listenerMap.values()) {
+      listener.entryAdded(key, value);
+    }
   }
 
   @Override
@@ -257,7 +268,15 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Override
   public Serializable remove(String key) throws ObjectStoreException {
     checkDelegatedStoreInitialized();
-    return delegateStore.remove(key);
+    Serializable res = delegateStore.remove(key);
+    entryRemoved(key);
+    return res;
+  }
+
+  private void entryRemoved(String key) {
+    for (ObjectStoreEntryListener listener : listenerMap.values()) {
+      listener.entryRemoved(key);
+    }
   }
 
   @Override
@@ -434,4 +453,18 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   public void setConfig(ObjectStoreConnector config) {
     this.config = config;
   }
+
+  public String addEntryListener(ObjectStoreEntryListener listener) {
+    String id = UUID.randomUUID().toString();
+    listenerMap.put(id, listener);
+    return id;
+  }
+
+  public boolean removeEntryListener(String key) {
+    if (listenerMap.remove(key) == null) {
+      return false;
+    }
+    return true;
+  }
+
 }
