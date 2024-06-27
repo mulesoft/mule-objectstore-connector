@@ -255,7 +255,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   private void entryAdded(String key, Serializable value) {
     for (ObjectStoreEntryListener listener : listenerMap.values()) {
-      listener.entryAdded(key, value);
+      listener.onEntryAdded(key, value);
     }
   }
 
@@ -275,7 +275,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   private void entryRemoved(String key) {
     for (ObjectStoreEntryListener listener : listenerMap.values()) {
-      listener.entryRemoved(key);
+      listener.onEntryRemoved(key);
     }
   }
 
