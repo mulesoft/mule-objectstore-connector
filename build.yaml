@@ -1,6 +1,9 @@
 mavenAdditionalArgs: -Dannotation.failOnError=false
 projectType: extension
 additionalTestConfigs:
+  jdk8:
+    testJdkTool: OPEN-JDK8
+    mavenAdditionalArgs: -DminVersion=4.3.0
   jdk11:
     testJdkTool: OPEN-JDK11
     mavenAdditionalArgs: -Dtest=none -DfailIfNoTests=false -DminVersion=4.3.0
