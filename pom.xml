@@ -10,13 +10,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.mule.connectors</groupId>
-    <artifactId>mule-objectstore-connector</artifactId>
+    <groupId>org.test.connectors</groupId>
+    <artifactId>local-objectstore-connector</artifactId>
     <packaging>mule-extension</packaging>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
-    <name>ObjectStore Connector</name>
-    <description>A Mule connector that provides functionality to access, create and manage Object stores</description>
+    <name>Local ObjectStore Connector</name>
+    <description>Provides functionality to access, create and manage local Object Stores when operating in clusterized environments</description>
 
     <properties>
         <formatterConfigPath>formatter.xml</formatterConfigPath>
