@@ -15,7 +15,6 @@ import static org.mule.runtime.core.api.event.EventContextFactory.create;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import org.mule.extension.objectstore.internal.MuleObjectStoreManagerProvider;
 import org.mule.extension.objectstore.internal.ObjectStoreConnector;
 import org.mule.extension.objectstore.internal.ObjectStoreRegistry;
 import org.mule.runtime.api.component.location.ComponentLocation;
@@ -357,17 +356,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
                                      e);
     }
 
-    ConnectionProvider<ObjectStoreManager> connectionProvider = configurationProvider.getConnectionProvider()
-        .orElseGet(FallbackObjectStoreManagerProvider::new);
-    if (connectionProvider instanceof MuleObjectStoreManagerProvider) {
-      // If the default is configured we need to switch between local and non-local based on the configuration.
-      if (local) {
-        // The fallback does exactly that.
-        return new FallbackObjectStoreManagerProvider();
-      }
-    }
-
-    return connectionProvider;
+    return configurationProvider.getConnectionProvider().orElseGet(FallbackObjectStoreManagerProvider::new);
   }
 
   // TODO: this can be removed after MULE-15209 is fixed.
