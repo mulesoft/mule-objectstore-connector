@@ -6,11 +6,13 @@
  */
 package org.mule.extension.objectstore.internal;
 
+import org.mule.extension.objectstore.api.ExtensionObjectStore;
 import org.mule.extension.objectstore.internal.error.AvailabilityErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.ContainsErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.RemoveErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.RetrieveErrorTypeProvider;
 import org.mule.extension.objectstore.internal.error.StoreErrorTypeProvider;
+import org.mule.extension.objectstore.internal.lock.LocalLockFactory;
 import org.mule.runtime.api.lock.LockFactory;
 import org.mule.runtime.api.meta.NamedObject;
 import org.mule.runtime.api.metadata.DataType;
@@ -56,6 +58,8 @@ import static org.mule.runtime.extension.api.error.MuleErrors.ANY;
  * @since 1.0
  */
 public class ObjectStoreOperations {
+
+  private static final LocalLockFactory LOCAL_LOCK_FACTORY = new LocalLockFactory();
 
   @Inject
   private LockFactory lockFactory;
@@ -367,7 +371,7 @@ public class ObjectStoreOperations {
 
   private Lock getKeyLock(String key, ObjectStore<Serializable> objectStore) {
 
-    return lockFactory.createLock(getStoreLockKey(objectStore) + "_" + key);
+    return getLockFactory(objectStore).createLock(getStoreLockKey(objectStore) + "_" + key);
   }
 
   private String getStoreLockKey(ObjectStore<Serializable> objectStore) {
@@ -377,7 +381,13 @@ public class ObjectStoreOperations {
   }
 
   private Lock getStoreLock(ObjectStore<Serializable> objectStore) {
-    return lockFactory.createLock(getStoreLockKey(objectStore));
+    return getLockFactory(objectStore).createLock(getStoreLockKey(objectStore));
+  }
+
+  private LockFactory getLockFactory(ObjectStore<?> objectStore) {
+    return (objectStore instanceof ExtensionObjectStore && ((ExtensionObjectStore) objectStore).isLocal())
+        ? LOCAL_LOCK_FACTORY
+        : lockFactory;
   }
 
   private ObjectStore<Serializable> nullSafe(ObjectStore<Serializable> objectStore) {
