@@ -9,6 +9,7 @@ package org.mule.extension.objectstore.internal;
 import static java.util.Optional.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.Is.is;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.any;
@@ -45,6 +46,7 @@ public class ExtensionObjectStoreTestCase {
 
   private static final String A_KEY = "aKey";
   private static final String A_VALUE = "aValue";
+  private static final String ANOTHER_KEY = "anotherKey";
   public static final String TOP_OS_NAME_PARAMETER = "name";
   public static final String PRIVATE_OS_ALIAS_PARAMETER = "alias";
 
@@ -55,9 +57,14 @@ public class ExtensionObjectStoreTestCase {
   private ObjectStoreManager runtimeObjectStoreManager;
 
   @Mock
+  private ObjectStoreManager runtimeLocalObjectStoreManager;
+
+  @Mock
   private ExtensionManager extensionManager;
 
   private ObjectStore<Serializable> delegate = new InMemoryObjectStore<>();
+
+  private ObjectStore<Serializable> delegateForLocal = new InMemoryObjectStore<>();
 
   @Spy
   private ObjectStoreRegistry registry = new ObjectStoreRegistry();
@@ -72,6 +79,9 @@ public class ExtensionObjectStoreTestCase {
   public void setUp() throws Exception {
     when(runtimeObjectStoreManager.getOrCreateObjectStore(anyString(), any()))
         .thenReturn(delegate);
+
+    when(runtimeLocalObjectStoreManager.getOrCreateObjectStore(anyString(), any()))
+        .thenReturn(delegateForLocal);
 
     injectStubParameters(privateObjectStore);
     injectStubParameters(globalObjectStore);
@@ -131,6 +141,25 @@ public class ExtensionObjectStoreTestCase {
 
     privateObjectStore.start();
     globalObjectStore.start();
+  }
+
+  @Test
+  public void localParameterChangesObjectStoreDelegate() throws NoSuchFieldException, IllegalAccessException, MuleException {
+    setFieldValue(privateObjectStore, "local", true, true);
+    setFieldValue(globalObjectStore, "local", true, true);
+
+    privateObjectStore.start();
+    globalObjectStore.start();
+
+    privateObjectStore.store(A_KEY, A_VALUE);
+    // Unfortunately the allKeys method on the test class InMemoryObjectStore is bugged, otherwise we would use that with a
+    // collection matcher to get better assertion messages
+    assertThat(delegateForLocal.contains(A_KEY), is(true));
+    assertThat(delegate.allKeys(), is(empty()));
+
+    globalObjectStore.store(ANOTHER_KEY, A_VALUE);
+    assertThat(delegateForLocal.contains(ANOTHER_KEY), is(true));
+    assertThat(delegate.allKeys(), is(empty()));
   }
 
   private void injectStubParameters(ObjectStore<Serializable> objectStore) throws IllegalAccessException, NoSuchFieldException {
