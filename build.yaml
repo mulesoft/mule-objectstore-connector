@@ -1,10 +1,13 @@
 mavenAdditionalArgs: -Dannotation.failOnError=false
 projectType: extension
 additionalTestConfigs:
+  default:
+    testJdkTool: OPEN-JDK8
+    mavenAdditionalArgs: -Dtest=none -DfailIfNoTests=false -DminVersion=4.4.0
   jdk11:
     testJdkTool: OPEN-JDK11
-    mavenAdditionalArgs: -Dtest=none -DfailIfNoTests=false -DminVersion=4.3.0
+    mavenAdditionalArgs: -Dtest=none -DfailIfNoTests=false -DruntimeVersion=4.8.5 -DruntimeProduct=MULE_EE
   jdk17:
     testJdkTool: OPEN-JDK17
-    mavenAdditionalArgs: -Dtest=none -DfailIfNoTests=false -DminVersion=4.6.0 -DruntimeVersion=4.6.0-rc2 -DruntimeProduct=MULE_EE
+    mavenAdditionalArgs: -Dtest=none -DfailIfNoTests=false -DminVersion=4.6.0
 mavenTool: "3.9.5"
