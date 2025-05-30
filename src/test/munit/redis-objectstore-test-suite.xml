@@ -18,7 +18,7 @@
     
     <os:config name="Redis_ObjectStore_Config" doc:name="Redis ObjectStore Config">
         <redis:nonclustered-connection host="non.existent.host" port="6379">
-            <reconnection failsDeployment="false">
+            <reconnection failsDeployment="true">
                 <reconnect count="1" frequency="100"/>
             </reconnection>
         </redis:nonclustered-connection>
