@@ -148,6 +148,12 @@
                         <version>${munit.version}</version>
                         <classifier>mule-plugin</classifier>
                     </dependency>
+                    <dependency>
+                        <groupId>com.mulesoft.connectors</groupId>
+                        <artifactId>mule-redis-connector</artifactId>
+                        <version>5.5.0-SNAPSHOT-os4</version>
+                        <classifier>mule-plugin</classifier>
+                    </dependency>
                 </dependencies>
             </plugin>
         </plugins>

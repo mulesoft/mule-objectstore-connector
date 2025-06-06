@@ -16,9 +16,9 @@
     
     <munit:config name="redis-objectstore-test-suite.xml"/>
     
-    <os:config name="Redis_ObjectStore_Config" doc:name="Redis ObjectStore Config">
-        <redis:nonclustered-connection host="non.existent.host" port="6379">
-            <reconnection failsDeployment="true">
+    <os:config name="Invalid_Redis_ObjectStore_Config" doc:name="Redis ObjectStore Config">
+        <redis:nonclustered-connection host="127.0.0.1" port="6379">
+            <reconnection failsDeployment="false">
                 <reconnect count="1" frequency="100"/>
             </reconnection>
         </redis:nonclustered-connection>
@@ -26,7 +26,7 @@
     
     <os:object-store name="Redis_Backed_ObjectStore" 
         doc:name="Redis Backed ObjectStore" 
-        config-ref="Redis_ObjectStore_Config" />
+        config-ref="Invalid_Redis_ObjectStore_Config" />
 
     <flow name="storeRandomIdFlow">
         <set-variable value="#[random() * 100000000]" doc:name="Set Variable" variableName="id"/>
