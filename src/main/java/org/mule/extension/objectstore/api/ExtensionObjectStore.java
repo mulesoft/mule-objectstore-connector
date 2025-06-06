@@ -6,13 +6,17 @@
  */
 package org.mule.extension.objectstore.api;
 
-import static java.lang.String.format;
 import static org.mule.runtime.api.connection.ConnectionValidationResult.success;
 import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 import static org.mule.runtime.core.api.event.EventContextFactory.create;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
+import static org.mule.sdk.api.error.MuleErrors.CONNECTIVITY;
+
+import static java.lang.String.format;
+
 import static org.slf4j.LoggerFactory.getLogger;
+
 import org.mule.extension.objectstore.internal.ObjectStoreConnector;
 import org.mule.extension.objectstore.internal.ObjectStoreRegistry;
 import org.mule.runtime.api.component.location.ComponentLocation;
@@ -22,6 +26,7 @@ import org.mule.runtime.api.connection.ConnectionValidationResult;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.lifecycle.Stoppable;
+import org.mule.runtime.api.message.ErrorType;
 import org.mule.runtime.api.message.Message;
 import org.mule.runtime.api.meta.NamedObject;
 import org.mule.runtime.api.store.ObjectStore;
@@ -45,7 +50,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -311,10 +315,19 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
     ConnectionValidationResult validationResult = storeManagerProvider.validate(storeManager);
     if (!validationResult.isValid()) {
-      String errorType = validationResult.getErrorType()
+      java.util.Optional<ErrorType> optionalError = validationResult.getErrorType();
+
+      String errorType = optionalError
           .map(type -> type.getNamespace() + ":" + type.getIdentifier())
           .orElse("UNKNOWN");
 
+      if (optionalError.isPresent()) {
+        ErrorType type = optionalError.get();
+        if (type.getIdentifier().equals(CONNECTIVITY.name())) {
+          throw new ConnectionException("Error trying to acquire a new connection: " + validationResult.getMessage(),
+                                        validationResult.getException());
+        }
+      }
       throw new DefaultMuleException(format("Obtained invalid connection from ObjectStore config '%s'.\n"
           + "Error Type: %s.\nMessage: %s",
                                             getConfigName(), errorType, validationResult.getMessage()));
@@ -337,7 +350,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
     try {
       configurationProvider = extensionManager.getConfiguration(getConfigName(), event);
     } catch (IllegalArgumentException e) {
-      throw new DefaultMuleException(format("ObjectStore '%s' points to configuration '%s' which doesn't exits",
+      throw new DefaultMuleException(format("ObjectStore '%s' points to configuration '%s' which doesn't exist",
                                             resolveStoreName(), getConfigName()),
                                      e);
     }
