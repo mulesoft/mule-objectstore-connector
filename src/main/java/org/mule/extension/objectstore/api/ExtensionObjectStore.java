@@ -11,6 +11,7 @@ import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 import static org.mule.runtime.core.api.event.EventContextFactory.create;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
+import static org.mule.sdk.api.error.MuleErrors.CONNECTIVITY;
 
 import static java.lang.String.format;
 
@@ -307,8 +308,6 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   private ObjectStoreManager getObjectStoreManager() throws MuleException {
     ObjectStoreManager storeManager;
     try {
-      // porque el connect devuelve la conexion si no esta vivo el redis? porque es un pool de conexiones
-      // devuelve el jedisPool y despues valida
       storeManager = storeManagerProvider.connect();
     } catch (ConnectionException e) {
       throw new DefaultMuleException(format("Could not obtain ObjectStore Manager from config '%s'", getConfigName()), e);
@@ -324,7 +323,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
       if (optionalError.isPresent()) {
         ErrorType type = optionalError.get();
-        if (type.getIdentifier().equals("CONNECTIVITY")) {
+        if (type.getIdentifier().equals(CONNECTIVITY.name())) {
           throw new ConnectionException("Error trying to acquire a new connection: " + validationResult.getMessage(),
                                         validationResult.getException());
         }
