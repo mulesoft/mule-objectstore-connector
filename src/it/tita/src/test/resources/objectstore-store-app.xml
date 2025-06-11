@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:os="http://www.mulesoft.org/schema/mule/os"
+      xmlns:redis="http://www.mulesoft.org/schema/mule/redis"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+                          http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+                          http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+                          http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
+
+    <configuration-properties file="${applicationsConfigProperties}"/>
+
+    <api-gateway:autodiscovery apiId="${api1}" flowRef="mysqlTimeoutTest"/>
+
+    <http:listener-config name="listenerConfig">
+        <http:listener-connection host="localhost" port="${port}" protocol="HTTP"/>
+    </http:listener-config>
+
+    <os:config name="osConfig">
+        <os:connection/>
+    </os:config>
+
+    <os:config name="Invalid_Redis_ObjectStore_Config_Fails_Deployment_False">
+        <redis:nonclustered-connection host="127.0.0.1" port="6379">
+            <reconnection failsDeployment="false">
+                <reconnect count="1" frequency="100"/>
+            </reconnection>
+        </redis:nonclustered-connection>
+    </os:config>
+
+    <os:config name="Invalid_Redis_ObjectStore_Config_Fails_Deployment_True">
+        <redis:nonclustered-connection host="127.0.0.1" port="6379">
+            <reconnection failsDeployment="true">
+                <reconnect count="1" frequency="100"/>
+            </reconnection>
+        </redis:nonclustered-connection>
+    </os:config>
+
+    <os:object-store name="Redis_Backed_ObjectStore_Fails_Deployment_True"
+                     config-ref="Invalid_Redis_ObjectStore_Config_Fails_Deployment_True"/>
+
+    <os:object-store name="Redis_Backed_ObjectStore_Fails_Deployment_False"
+                     config-ref="Invalid_Redis_ObjectStore_Config_Fails_Deployment_False"/>
+
+    <flow name="storeRandomIdFlow_Fails_Deployment_True">
+        <http:listener path="/storeFailsDeploymentTrue" config-ref="listenerConfig"/>
+        <os:store key="123" objectStore="Redis_Backed_ObjectStore_Fails_Deployment_True"/>
+    </flow>
+
+    <flow name="storeRandomIdFlow_Fails_Deployment_False">
+        <http:listener path="/storeFailsDeploymentFalse" config-ref="listenerConfig"/>
+        <os:store key="123" objectStore="Redis_Backed_ObjectStore_Fails_Deployment_False"/>
+    </flow>
+
+</mule> 

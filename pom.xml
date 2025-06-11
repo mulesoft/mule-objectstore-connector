@@ -34,6 +34,9 @@
         <license.maven.plugin.version>4.2</license.maven.plugin.version>
         <licensePath>LICENSE_HEADER_CPAL.txt</licensePath>
         <licenseYear>2023</licenseYear>
+
+        <skipTita>false</skipTita>
+        <settingsFile>${java.io.tmpdir}/effective-settings.xml</settingsFile>
     </properties>
 
     <dependencies>
@@ -149,6 +152,47 @@
                         <version>${munit.version}</version>
                         <classifier>mule-plugin</classifier>
                     </dependency>
+                    <dependency>
+                        <groupId>com.mulesoft.connectors</groupId>
+                        <artifactId>mule-redis-connector</artifactId>
+                        <version>${mule-redis-connector.version}</version>
+                        <classifier>mule-plugin</classifier>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-invoker-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <debug>false</debug>
+                    <streamLogs>true</streamLogs>
+                    <noLog>true</noLog>
+                    <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+                    <pomIncludes>
+                        <pomInclude>*/pom.xml</pomInclude>
+                    </pomIncludes>
+                    <properties>
+                        <maven.settings.local>${settingsFile}</maven.settings.local>
+                    </properties>
+                    <goals>
+                        <goal>clean</goal>
+                        <goal>generate-sources</goal>
+                        <goal>test</goal>
+                    </goals>
+                    <skipInvocation>${skipTita}</skipInvocation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>tita-tests</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                    </execution>
+                </executions>
+                <dependencies>
                     <dependency>
                         <groupId>com.mulesoft.connectors</groupId>
                         <artifactId>mule-redis-connector</artifactId>

@@ -323,6 +323,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
       if (optionalError.isPresent()) {
         ErrorType type = optionalError.get();
+        // TODO: Review if catch error type or exception
         if (type.getIdentifier().equals(CONNECTIVITY.name())) {
           throw new ConnectionException("Error trying to acquire a new connection: " + validationResult.getMessage(),
                                         validationResult.getException());
