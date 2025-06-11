@@ -46,7 +46,7 @@
             <dependency>
                 <groupId>com.mulesoft.connectors</groupId>
                 <artifactId>mule-redis-connector</artifactId>
-                <version>5.5.0-SNAPSHOT-os6</version>
+                <version>5.5.0-SNAPSHOT</version>
                 <classifier>mule-plugin</classifier>
             </dependency>
     </dependencies>
