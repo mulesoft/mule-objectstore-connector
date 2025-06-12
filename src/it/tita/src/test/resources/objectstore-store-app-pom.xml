@@ -11,7 +11,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <app.runtime>4.3.0</app.runtime>
-        <mule.maven.plugin.version>3.3.5</mule.maven.plugin.version>
+        <mule.maven.plugin.version>4.5.0</mule.maven.plugin.version>
+        <mule-objectstore-connector.version>2.0.0-SNAPSHOT</mule-objectstore-connector.version>
+        <mule-redis-connector.version>5.4.7</mule-redis-connector.version>
     </properties>
 
     <build>
@@ -40,13 +42,13 @@
             <dependency>
                 <groupId>org.mule.connectors</groupId>
                 <artifactId>mule-objectstore-connector</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
+                <version>${mule-objectstore-connector.version}</version>
                 <classifier>mule-plugin</classifier>
             </dependency>
             <dependency>
                 <groupId>com.mulesoft.connectors</groupId>
                 <artifactId>mule-redis-connector</artifactId>
-                <version>5.5.0-SNAPSHOT</version>
+                <version>${mule-redis-connector.version}</version>
                 <classifier>mule-plugin</classifier>
             </dependency>
     </dependencies>

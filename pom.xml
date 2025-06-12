@@ -36,7 +36,8 @@
         <licenseYear>2023</licenseYear>
 
         <skipTita>false</skipTita>
-        <settingsFile>${java.io.tmpdir}/effective-settings.xml</settingsFile>
+        <settings.file>${java.io.tmpdir}/effective-settings.xml</settings.file>
+        <maven-help-plugin.version>3.5.1</maven-help-plugin.version>
     </properties>
 
     <dependencies>
@@ -200,6 +201,24 @@
                         <classifier>mule-plugin</classifier>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-help-plugin</artifactId>
+                <version>${maven-help-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-test-resources</phase>
+                        <id>copy-settings</id>
+                        <goals>
+                            <goal>effective-settings</goal>
+                        </goals>
+                        <configuration>
+                            <output>${settings.file}</output>
+                            <showPasswords>true</showPasswords>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

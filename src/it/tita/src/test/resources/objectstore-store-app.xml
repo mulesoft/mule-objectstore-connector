@@ -4,14 +4,17 @@
       xmlns:os="http://www.mulesoft.org/schema/mule/os"
       xmlns:redis="http://www.mulesoft.org/schema/mule/redis"
       xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
       xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
                           http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
                           http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-                          http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd">
+                          http://www.mulesoft.org/schema/mule/redis http://www.mulesoft.org/schema/mule/redis/current/mule-redis.xsd
+                          http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
 
     <configuration-properties file="${applicationsConfigProperties}"/>
 
-    <api-gateway:autodiscovery apiId="${api1}" flowRef="mysqlTimeoutTest"/>
+    <api-gateway:autodiscovery apiId="${api1}" flowRef="storeRandomIdFlow_Fails_Deployment_True"/>
+    <api-gateway:autodiscovery apiId="${api2}" flowRef="storeRandomIdFlow_Fails_Deployment_False"/>
 
     <http:listener-config name="listenerConfig">
         <http:listener-connection host="localhost" port="${port}" protocol="HTTP"/>
