@@ -1,9 +1,12 @@
 mavenAdditionalArgs: -Dannotation.failOnError=false
 projectType: extension
 additionalTestConfigs:
+  default:
+    testJdkTool: OPEN-JDK8
+    mavenAdditionalArgs: -Dtest=none -DfailIfNoTests=false -DminVersion=4.4.0
   jdk11:
     testJdkTool: OPEN-JDK11
-    mavenAdditionalArgs: -Dtest=none -DfailIfNoTests=false -DruntimeVersion=4.8.5
+    mavenAdditionalArgs: -Dtest=none -DfailIfNoTests=false -DruntimeVersion=4.8.5 # TODO: Remove this runtimeVersion once we have a new parent version with MTF
   jdk17:
     testJdkTool: OPEN-JDK17
     mavenAdditionalArgs: -Dtest=none -DfailIfNoTests=false -DminVersion=4.6.0
