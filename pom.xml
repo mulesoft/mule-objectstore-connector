@@ -193,14 +193,6 @@
                         <inherited>false</inherited>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.mulesoft.connectors</groupId>
-                        <artifactId>mule-redis-connector</artifactId>
-                        <version>${mule-redis-connector.version}</version>
-                        <classifier>mule-plugin</classifier>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
