@@ -27,7 +27,6 @@
         <munit.extensions.maven.plugin.version>1.5.0</munit.extensions.maven.plugin.version>
         <munit.version>3.4.0</munit.version>
         <jacoco.version>0.8.10</jacoco.version>
-        <mule-redis-connector.version>5.4.7</mule-redis-connector.version>
         <mavenResourcesVersion>3.3.0</mavenResourcesVersion>
 
         <mulesoftLicenseVersion>1.4.0</mulesoftLicenseVersion>
@@ -147,12 +146,6 @@
                         <groupId>com.mulesoft.munit</groupId>
                         <artifactId>munit-tools</artifactId>
                         <version>${munit.version}</version>
-                        <classifier>mule-plugin</classifier>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.mulesoft.connectors</groupId>
-                        <artifactId>mule-redis-connector</artifactId>
-                        <version>${mule-redis-connector.version}</version>
                         <classifier>mule-plugin</classifier>
                     </dependency>
                 </dependencies>
