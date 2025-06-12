@@ -51,7 +51,7 @@ public class RedisObjectStoreDeploymentTestCase {
 
     @Test
     public void testObjectStoreConnectionWithFailsDeploymentTrue() {
-        HttpResponse response = runtime.api(API).request( "/storeFailsDeploymentTrue").get();
+        HttpResponse response = runtime.api(API_1).request( "/storeFailsDeploymentTrue").get();
         assertThat(response.statusCode(), is(equalTo(500)));
     }
 }
