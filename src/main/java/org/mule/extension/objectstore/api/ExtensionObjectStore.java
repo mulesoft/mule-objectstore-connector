@@ -302,25 +302,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   }
 
   private ObjectStoreManager getObjectStoreManager() throws MuleException {
-    ObjectStoreManager storeManager;
-    try {
-      storeManager = storeManagerProvider.connect();
-    } catch (ConnectionException e) {
-      throw new DefaultMuleException(format("Could not obtain ObjectStore Manager from config '%s'", getConfigName()), e);
-    }
-
-    ConnectionValidationResult validationResult = storeManagerProvider.validate(storeManager);
-    if (!validationResult.isValid()) {
-      String errorType = validationResult.getErrorType()
-          .map(type -> type.getNamespace() + ":" + type.getIdentifier())
-          .orElse("UNKNOWN");
-
-      throw new DefaultMuleException(format("Obtained invalid connection from ObjectStore config '%s'.\n"
-          + "Error Type: %s.\nMessage: %s",
-                                            getConfigName(), errorType, validationResult.getMessage()));
-    }
-
-    return storeManager;
+    return storeManagerProvider.connect();
   }
 
   private ConnectionProvider<ObjectStoreManager> getObjectStoreManagerProvider() throws MuleException {
