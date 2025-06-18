@@ -9,10 +9,12 @@ package org.mule.extension.objectstore.api;
 import static java.lang.String.format;
 import static org.mule.runtime.api.connection.ConnectionValidationResult.success;
 import static org.mule.runtime.api.meta.ExpressionSupport.NOT_SUPPORTED;
+import static org.mule.runtime.core.api.config.MuleProperties.LOCAL_OBJECT_STORE_MANAGER;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_STORE_MANAGER;
 import static org.mule.runtime.core.api.event.EventContextFactory.create;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
 import static org.slf4j.LoggerFactory.getLogger;
+
 import org.mule.extension.objectstore.internal.ObjectStoreConnector;
 import org.mule.extension.objectstore.internal.ObjectStoreRegistry;
 import org.mule.runtime.api.component.location.ComponentLocation;
@@ -78,6 +80,10 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Inject
   @Named(OBJECT_STORE_MANAGER)
   private ObjectStoreManager runtimeObjectStoreManager;
+
+  @Inject
+  @Named(LOCAL_OBJECT_STORE_MANAGER)
+  private ObjectStoreManager runtimeLocalObjectStoreManager;
 
   /**
    * Whether the store is persistent or transient.
@@ -149,6 +155,14 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
   @Expression(NOT_SUPPORTED)
   @ParameterDsl(allowInlineDefinition = false)
   protected ObjectStoreConnector config;
+
+  /**
+   * When running in cluster mode, this indicates that the {@link ObjectStore} is local to the node instead of being distributed.
+   */
+  @Parameter
+  @Optional(defaultValue = "false")
+  @Expression(NOT_SUPPORTED)
+  private boolean local;
 
   private transient ConnectionProvider<ObjectStoreManager> storeManagerProvider;
   private transient ObjectStoreManager objectStoreManager;
@@ -343,7 +357,7 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
     @Override
     public ObjectStoreManager connect() throws ConnectionException {
-      return runtimeObjectStoreManager;
+      return local ? runtimeLocalObjectStoreManager : runtimeObjectStoreManager;
     }
 
     @Override
@@ -415,5 +429,9 @@ public abstract class ExtensionObjectStore implements ObjectStore<Serializable>,
 
   public void setConfig(ObjectStoreConnector config) {
     this.config = config;
+  }
+
+  public boolean isLocal() {
+    return local;
   }
 }
